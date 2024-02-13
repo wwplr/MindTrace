@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "931280711326",
+    "project_id": "mindtrace-fb738",
+    "storage_bucket": "mindtrace-fb738.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931280711326:android:6dc89622a441e35f4a958f",
+        "android_client_info": {
+          "package_name": "com.example.mind_trace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0tiQo2EViABQljLmyxW0Rp-0tCL1_U2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
