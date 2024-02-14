@@ -18,7 +18,6 @@ class _SignUpState extends State<SignUp> {
   Color colour2 = Colors.white;
   Color colour3 = Colors.white;
   Color colour4 = Colors.white;
-  Color password = Colors.white;
 
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -30,7 +29,7 @@ class _SignUpState extends State<SignUp> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext ctx) {
-        Future.delayed(Duration(milliseconds: 800), () {
+        Future.delayed(Duration(milliseconds: 600), () {
           Navigator.pop(ctx);
         });
         return Center(
@@ -347,7 +346,7 @@ class _SignUpState extends State<SignUp> {
                                         enableInteractiveSelection: false,
                                         autocorrect: false,
                                         style: TextStyle(
-                                            color: password
+                                            color: Colors.white
                                         ),
                                         maxLines: 1,
                                         keyboardType: TextInputType.text,
@@ -397,14 +396,6 @@ class _SignUpState extends State<SignUp> {
                                             } else {
                                               colour4 = Colors.red.shade900;
                                             }
-
-                                            if (value != _passwordController2.text &&
-                                                _passwordController2.text.isNotEmpty
-                                            ) {
-                                              password = Colors.red.shade900;
-                                            } else {
-                                              password = Colors.white;
-                                            }
                                           });
                                         },
                                       )
@@ -419,7 +410,7 @@ class _SignUpState extends State<SignUp> {
                                         enableSuggestions: false,
                                         enableInteractiveSelection: false,
                                         style: TextStyle(
-                                            color: password
+                                            color: Colors.white
                                         ),
                                         maxLines: 1,
                                         keyboardType: TextInputType.text,
@@ -443,18 +434,6 @@ class _SignUpState extends State<SignUp> {
                                             ),
                                           ),
                                         ),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            value = _passwordController2.text;
-                                            if (value != _passwordController.text &&
-                                                value.isNotEmpty
-                                            ) {
-                                              password = Colors.red.shade900;
-                                            } else {
-                                              password = Colors.white;
-                                            }
-                                          });
-                                        },
                                       )
                                   )
                               ),
