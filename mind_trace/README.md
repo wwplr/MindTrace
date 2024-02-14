@@ -1,4 +1,4 @@
-# mind_trace
+# MindTrace
 
 A new Flutter project.
 
