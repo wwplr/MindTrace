@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:mind_trace/main_page.dart';
+
+import 'login.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -40,6 +43,10 @@ class _HomePageState extends State<HomePage> {
                       ElevatedButton(
                           onPressed: () {
                             FirebaseAuth.instance.signOut();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Login())
+                            );
                             },
                           child: Text(
                               'Log Out',
