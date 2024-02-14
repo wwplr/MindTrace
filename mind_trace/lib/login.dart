@@ -291,7 +291,7 @@ class _LoginState extends State<Login> {
                                           style: TextStyle(
                                               color: Color(0xFFB38AEE),
                                               fontSize: 18,
-                                              fontWeight: FontWeight.w400
+                                              fontWeight: FontWeight.w500
                                           )
                                       )
                                   )

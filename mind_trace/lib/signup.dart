@@ -18,7 +18,9 @@ class _SignUpState extends State<SignUp> {
   Color colour2 = Colors.white;
   Color colour3 = Colors.white;
   Color colour4 = Colors.white;
+  Color password = Colors.white;
 
+  final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordController2 = TextEditingController();
@@ -37,16 +39,89 @@ class _SignUpState extends State<SignUp> {
       },
     );
 
-    if (!_passwordController.text.contains(RegExp('[A-Z]')) ||
+    if (_nameController.text.isNotEmpty &&
+        _usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        (!_passwordController.text.contains(RegExp('[A-Z]')) ||
         !_passwordController.text.contains(RegExp('[a-z]')) ||
         !_passwordController.text.contains(RegExp('[0-9]')) ||
         _passwordController.text.length < 8)
-    {
+    ) {
       popup('Password is too weak.');
     }
 
-    if (_passwordController.text != _passwordController2.text) {
-      popup('Password does not match.');
+    if (_nameController.text.isNotEmpty &&
+        _usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _passwordController2.text.isNotEmpty &&
+        _passwordController.text != _passwordController2.text &&
+        _passwordController.text.contains(RegExp('[A-Z]')) &&
+        _passwordController.text.contains(RegExp('[a-z]')) &&
+        _passwordController.text.contains(RegExp('[0-9]')) &&
+        _passwordController.text.length >= 8
+    )
+    {
+      popup('Passwords do not match.');
+    }
+
+    if (_nameController.text.isEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _passwordController2.text.isNotEmpty &&
+        _usernameController.text.isNotEmpty
+    ) {
+      popup('Please enter your name.');
+    }
+
+    if (_usernameController.text.isEmpty &&
+        _nameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _passwordController2.text.isNotEmpty
+    ) {
+      popup('Please enter your email address.');
+    }
+
+    if (_nameController.text.isEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _passwordController2.text.isNotEmpty &&
+        _usernameController.text.isEmpty
+    ) {
+      popup('Please enter your name and email address.');
+    }
+
+    if ((_passwordController.text.isEmpty &&
+        _usernameController.text.isNotEmpty &&
+        _nameController.text.isNotEmpty &&
+        _passwordController2.text.isNotEmpty) ||
+        (_passwordController.text.isEmpty &&
+        _usernameController.text.isNotEmpty &&
+        _nameController.text.isNotEmpty &&
+        _passwordController2.text.isEmpty)
+    ) {
+      popup('Please enter your password.');
+    }
+
+    if (_passwordController2.text.isEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _usernameController.text.isNotEmpty &&
+        _nameController.text.isNotEmpty
+    ) {
+      popup('Please confirm your password.');
+    }
+
+    if ((_nameController.text.isEmpty &&
+        _passwordController.text.isEmpty &&
+        _passwordController2.text.isEmpty &&
+        _usernameController.text.isEmpty) ||
+        (_nameController.text.isNotEmpty &&
+            _passwordController.text.isEmpty &&
+            _passwordController2.text.isEmpty &&
+            _usernameController.text.isEmpty)||
+        (_nameController.text.isEmpty &&
+            _passwordController.text.isEmpty &&
+            _passwordController2.text.isEmpty &&
+            _usernameController.text.isNotEmpty)
+    ) {
+      popup('Please enter your information.');
     }
   }
 
@@ -221,6 +296,7 @@ class _SignUpState extends State<SignUp> {
                                         style: const TextStyle(
                                             color: Colors.white
                                         ),
+                                        controller: _nameController,
                                         maxLines: 1,
                                         cursorColor: Colors.white,
                                         decoration: const InputDecoration(
@@ -270,6 +346,31 @@ class _SignUpState extends State<SignUp> {
                                         enableSuggestions: false,
                                         enableInteractiveSelection: false,
                                         autocorrect: false,
+                                        style: TextStyle(
+                                            color: password
+                                        ),
+                                        maxLines: 1,
+                                        keyboardType: TextInputType.text,
+                                        textInputAction: TextInputAction.done,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp('[A-Za-z0-9]')
+                                          )
+                                        ],
+                                        cursorColor: Colors.white,
+                                        decoration: InputDecoration(
+                                          hintText: 'Password',
+                                          hintStyle: const TextStyle(
+                                              color: Colors.white
+                                          ),
+                                          suffixIcon: togglePassword(),
+                                          suffixIconColor: Colors.white,
+                                          enabledBorder: const UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white
+                                            ),
+                                          ),
+                                        ),
                                         onChanged: (value) {
                                           setState(() {
                                             value = _passwordController.text;
@@ -296,33 +397,16 @@ class _SignUpState extends State<SignUp> {
                                             } else {
                                               colour4 = Colors.red.shade900;
                                             }
+
+                                            if (value != _passwordController2.text &&
+                                                _passwordController2.text.isNotEmpty
+                                            ) {
+                                              password = Colors.red.shade900;
+                                            } else {
+                                              password = Colors.white;
+                                            }
                                           });
                                         },
-                                        style: const TextStyle(
-                                            color: Colors.white
-                                        ),
-                                        maxLines: 1,
-                                        keyboardType: TextInputType.text,
-                                        textInputAction: TextInputAction.done,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                              RegExp('[A-Za-z0-9]')
-                                          )
-                                        ],
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: 'Password',
-                                          hintStyle: const TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          suffixIcon: togglePassword(),
-                                          suffixIconColor: Colors.white,
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
                                       )
                                   )
                               ),
@@ -334,8 +418,8 @@ class _SignUpState extends State<SignUp> {
                                         obscureText: _securedPassword2,
                                         enableSuggestions: false,
                                         enableInteractiveSelection: false,
-                                        style: const TextStyle(
-                                            color: Colors.white
+                                        style: TextStyle(
+                                            color: password
                                         ),
                                         maxLines: 1,
                                         keyboardType: TextInputType.text,
@@ -359,6 +443,18 @@ class _SignUpState extends State<SignUp> {
                                             ),
                                           ),
                                         ),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            value = _passwordController2.text;
+                                            if (value != _passwordController.text &&
+                                                value.isNotEmpty
+                                            ) {
+                                              password = Colors.red.shade900;
+                                            } else {
+                                              password = Colors.white;
+                                            }
+                                          });
+                                        },
                                       )
                                   )
                               ),
@@ -410,7 +506,11 @@ class _SignUpState extends State<SignUp> {
                                             !_passwordController.text.contains(RegExp('[A-Z]')) ||
                                             !_passwordController.text.contains(RegExp('[a-z]')) ||
                                             !_passwordController.text.contains(RegExp('[0-9]')) ||
-                                            _passwordController.text.length < 8)
+                                            _passwordController.text.length < 8 ||
+                                            _nameController.text.isEmpty ||
+                                            _passwordController.text.isEmpty ||
+                                            _passwordController2.text.isEmpty ||
+                                            _usernameController.text.isEmpty)
                                         {
                                           checkValidation();
                                         } else {
