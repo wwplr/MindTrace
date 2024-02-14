@@ -1,11 +1,10 @@
-import 'package:email_validator/email_validator.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mind_trace/home_page.dart';
 import 'package:mind_trace/signup.dart';
+import 'package:page_transition/page_transition.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -36,10 +35,11 @@ class _LoginState extends State<Login> {
       );
       Navigator.pop(context);
       Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) =>
-              HomePage()
-          )
+        context,
+        PageTransition(
+          type: PageTransitionType.fade,
+          child: HomePage(),
+        ),
       );
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
@@ -134,7 +134,7 @@ class _LoginState extends State<Login> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    stops: [0.3, 1.0],
+                    stops: [0.4, 1.0],
                     colors: [
                       Color(0xFFA97DE6),
                       Color(0xFF83AFFA)
@@ -270,10 +270,11 @@ class _LoginState extends State<Login> {
                                   child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => const SignUp()
-                                            )
+                                          context,
+                                          PageTransition(
+                                            type: PageTransitionType.fade,
+                                            child: SignUp(),
+                                          ),
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -284,7 +285,8 @@ class _LoginState extends State<Login> {
                                         ),
                                         elevation: 2.0,
                                       ),
-                                      child: const Text('Sign Up',
+                                      child: const Text(
+                                          'Sign Up',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                               color: Color(0xFFB38AEE),

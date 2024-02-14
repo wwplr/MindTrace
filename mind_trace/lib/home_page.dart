@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mind_trace/main_page.dart';
+import 'package:page_transition/page_transition.dart';
 
 import 'login.dart';
 
@@ -45,9 +46,12 @@ class _HomePageState extends State<HomePage> {
                             FirebaseAuth.instance.signOut();
                             Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => Login())
+                                PageTransition(
+                                  type: PageTransitionType.fade,
+                                  child: Login(),
+                                )
                             );
-                            },
+                          },
                           child: Text(
                               'Log Out',
                               style: TextStyle(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mind_trace/home_page.dart';
+import 'package:page_transition/page_transition.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -74,8 +75,11 @@ class _SignUpState extends State<SignUp> {
         Navigator.pop(context);
 
         Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage())
+            context,
+            PageTransition(
+              type: PageTransitionType.fade,
+              child: HomePage(),
+            )
           );
       }
     } on FirebaseAuthException catch (e) {
@@ -181,7 +185,7 @@ class _SignUpState extends State<SignUp> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    stops: [0.3, 1.0],
+                    stops: [0.4, 1.0],
                     colors: [
                       Color(0xFFA97DE6),
                       Color(0xFF83AFFA)
