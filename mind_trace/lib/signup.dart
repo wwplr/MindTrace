@@ -18,6 +18,7 @@ class _SignUpState extends State<SignUp> {
   Color colour2 = Color(0xFF2A364E);
   Color colour3 = Color(0xFF2A364E);
   Color colour4 = Color(0xFF2A364E);
+  late String name;
 
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -146,6 +147,10 @@ class _SignUpState extends State<SignUp> {
           email: _usernameController.text,
           password: _passwordController.text,
         );
+
+        final user = FirebaseAuth.instance.currentUser!;
+        await user.updateDisplayName(name);
+
         Navigator.pop(context);
 
         Navigator.push(
@@ -550,6 +555,7 @@ class _SignUpState extends State<SignUp> {
                                             margin: EdgeInsets.only(top: (0.05*height)),
                                             child: ElevatedButton(
                                                 onPressed: () {
+                                                  name = _nameController.text;
                                                   if (_passwordController.text != _passwordController2.text ||
                                                       !_passwordController.text.contains(RegExp('[A-Z]')) ||
                                                       !_passwordController.text.contains(RegExp('[a-z]')) ||
@@ -566,7 +572,7 @@ class _SignUpState extends State<SignUp> {
                                                   }
                                                 },
                                                 style: ElevatedButton.styleFrom(
-                                                  fixedSize: const Size(200, 55),
+                                                  fixedSize: Size(0.45*width, 0.06*height),
                                                   backgroundColor: Color(0xFF49688D),
                                                   shape: RoundedRectangleBorder(
                                                       borderRadius: BorderRadius.circular(100)

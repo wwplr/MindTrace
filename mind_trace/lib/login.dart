@@ -316,7 +316,7 @@ class _LoginState extends State<Login> {
                                                     }
                                                   },
                                                   style: ElevatedButton.styleFrom(
-                                                    fixedSize: const Size(200, 55),
+                                                    fixedSize: Size(0.45*width, 0.06*height),
                                                     backgroundColor: Color(0xFFA986E4),
                                                     shape: RoundedRectangleBorder(
                                                         borderRadius: BorderRadius.circular(100)
@@ -363,7 +363,7 @@ class _LoginState extends State<Login> {
                                                           );
                                                         },
                                                         style: ElevatedButton.styleFrom(
-                                                          fixedSize: const Size(160, 50),
+                                                          fixedSize: Size(0.35*width, 0.06*height),
                                                           backgroundColor: Color(0xFF49688D),
                                                           shape: RoundedRectangleBorder(
                                                               borderRadius: BorderRadius.circular(100)

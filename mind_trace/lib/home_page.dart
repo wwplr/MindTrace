@@ -1,14 +1,15 @@
+import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
+import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:mind_trace/main_page.dart';
-import 'package:page_transition/page_transition.dart';
-
-import 'login.dart';
+import 'home.dart';
+import 'account.dart';
+import 'add.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final user = FirebaseAuth.instance.currentUser!;
+  int selectedIndex = 0;
 
   @override
   void initState() {
@@ -31,47 +33,47 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  void bottomNavBar(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
+  final List<Widget> pages = [
+    Home(),
+    Add(),
+    Account()
+  ];
+
   @override
   Widget build(BuildContext context){
+    double width = MediaQuery.of(context).size.width;
+
     return PopScope(
         canPop: false,
         child: Scaffold(
-            body: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text('Signed In as: ' + user.email!),
-                      ElevatedButton(
-                          onPressed: () {
-                            FirebaseAuth.instance.signOut();
-                            Navigator.push(
-                                context,
-                                PageTransition(
-                                  type: PageTransitionType.fade,
-                                  child: Login(),
-                                )
-                            );
-                          },
-                          child: Text(
-                              'Log Out',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500
-                              )
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: const Size(150, 50),
-                            backgroundColor: Color(0xFFB38AEE),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(100)
-                            ),
-                            elevation: 2.0,
-                          )
-                      )
-                    ]
-                )
-            )
+            backgroundColor: Colors.white,
+            bottomNavigationBar: CurvedNavigationBar(
+              buttonBackgroundColor: Color(0xFFC6F2FF),
+              iconPadding: 20,
+              backgroundColor: Colors.white,
+              color: Color(0xFFC6F2FF),
+              animationDuration: Duration(milliseconds: 400),
+              index: selectedIndex,
+              onTap: bottomNavBar,
+              items: [
+                CurvedNavigationBarItem (
+                    child: Icon(Icons.home),
+                ),
+                CurvedNavigationBarItem (
+                  child: Icon(Icons.add),
+                ),
+                CurvedNavigationBarItem (
+                  child: Icon(Icons.person),
+                ),
+              ],
+            ),
+            body: pages[selectedIndex]
         )
     );
   }
