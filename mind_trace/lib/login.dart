@@ -108,7 +108,7 @@ class _LoginState extends State<Login> {
                           child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                fixedSize: Size((0.18*width), (0.02*height)),
+                                fixedSize: Size((0.19*width), (0.02*height)),
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20)
