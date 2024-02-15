@@ -326,7 +326,8 @@ class _SignUpState extends State<SignUp> {
                                             padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width)),
                                             child: Form(
                                                 child: TextFormField(
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
+                                                      fontSize: fontSize*1.3,
                                                       fontFamily: "Quicksand",
                                                       fontWeight: FontWeight.w500,
                                                       letterSpacing: 0.5,
@@ -335,13 +336,14 @@ class _SignUpState extends State<SignUp> {
                                                   controller: _nameController,
                                                   maxLines: 1,
                                                   cursorColor: Color(0xFF2A364E),
-                                                  decoration: const InputDecoration(
+                                                  decoration: InputDecoration(
                                                     hintText: 'Name',
                                                     hintStyle: TextStyle(
+                                                        fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
                                                         fontWeight: FontWeight.w500,
                                                         letterSpacing: 0.5,
-                                                        color: Color(0xFF2A364E)
+                                                        color: Color(0xFF2A364E),
                                                     ),
                                                     enabledBorder: UnderlineInputBorder(
                                                       borderSide: BorderSide(
@@ -356,7 +358,8 @@ class _SignUpState extends State<SignUp> {
                                             padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.02*height)),
                                             child: Form(
                                                 child: TextFormField(
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
+                                                      fontSize: fontSize*1.3,
                                                       fontFamily: "Quicksand",
                                                       fontWeight: FontWeight.w500,
                                                       letterSpacing: 0.5,
@@ -365,9 +368,10 @@ class _SignUpState extends State<SignUp> {
                                                   controller: _usernameController,
                                                   maxLines: 1,
                                                   cursorColor: Color(0xFF2A364E),
-                                                  decoration: const InputDecoration(
+                                                  decoration: InputDecoration(
                                                     hintText: 'Email',
                                                     hintStyle: TextStyle(
+                                                        fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
                                                         fontWeight: FontWeight.w500,
                                                         letterSpacing: 0.5,
@@ -392,6 +396,7 @@ class _SignUpState extends State<SignUp> {
                                                   enableInteractiveSelection: false,
                                                   autocorrect: false,
                                                   style: TextStyle(
+                                                      fontSize: fontSize*1.3,
                                                       fontFamily: "Quicksand",
                                                       fontWeight: FontWeight.w500,
                                                       letterSpacing: 0.5,
@@ -408,7 +413,8 @@ class _SignUpState extends State<SignUp> {
                                                   cursorColor: Color(0xFF2A364E),
                                                   decoration: InputDecoration(
                                                     hintText: 'Password',
-                                                    hintStyle: const TextStyle(
+                                                    hintStyle: TextStyle(
+                                                        fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
                                                         fontWeight: FontWeight.w500,
                                                         letterSpacing: 0.5,
@@ -462,6 +468,7 @@ class _SignUpState extends State<SignUp> {
                                                   enableSuggestions: false,
                                                   enableInteractiveSelection: false,
                                                   style: TextStyle(
+                                                      fontSize: fontSize*1.3,
                                                       fontFamily: "Quicksand",
                                                       fontWeight: FontWeight.w500,
                                                       letterSpacing: 0.5,
@@ -478,7 +485,8 @@ class _SignUpState extends State<SignUp> {
                                                   cursorColor: Color(0xFF2A364E),
                                                   decoration: InputDecoration(
                                                     hintText: 'Confirm Password',
-                                                    hintStyle: const TextStyle(
+                                                    hintStyle: TextStyle(
+                                                        fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
                                                         fontWeight: FontWeight.w500,
                                                         letterSpacing: 0.5,

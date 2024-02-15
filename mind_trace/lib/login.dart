@@ -238,7 +238,8 @@ class _LoginState extends State<Login> {
                                               margin: EdgeInsets.only(left: (0.1*width), right: (0.1*width)),
                                               child: Form(
                                                   child: TextFormField(
-                                                    style: const TextStyle(
+                                                    style:  TextStyle(
+                                                        fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
                                                         fontWeight: FontWeight.w500,
                                                         letterSpacing: 0.5,
@@ -247,9 +248,10 @@ class _LoginState extends State<Login> {
                                                     controller: _usernameController,
                                                     maxLines: 1,
                                                     cursorColor: Color(0xFF2A364E),
-                                                    decoration: const InputDecoration(
+                                                    decoration: InputDecoration(
                                                       hintText: 'Username',
                                                       hintStyle: TextStyle(
+                                                          fontSize: fontSize*1.3,
                                                           fontFamily: "Quicksand",
                                                           fontWeight: FontWeight.w500,
                                                           letterSpacing: 0.5,
@@ -271,7 +273,8 @@ class _LoginState extends State<Login> {
                                                     controller: _passwordController,
                                                     obscureText: _securedPassword,
                                                     enableInteractiveSelection: false,
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
+                                                        fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
                                                         fontWeight: FontWeight.w500,
                                                         letterSpacing: 0.5,
@@ -288,7 +291,8 @@ class _LoginState extends State<Login> {
                                                     cursorColor: Color(0xFF2A364E),
                                                     decoration: InputDecoration(
                                                       hintText: 'Password',
-                                                      hintStyle: const TextStyle(
+                                                      hintStyle: TextStyle(
+                                                          fontSize: fontSize*1.3,
                                                           fontFamily: "Quicksand",
                                                           fontWeight: FontWeight.w500,
                                                           letterSpacing: 0.5,
