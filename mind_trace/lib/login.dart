@@ -19,6 +19,33 @@ class _LoginState extends State<Login> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+
+  void check() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) {
+        Future.delayed(Duration(milliseconds: 600), () {
+          Navigator.pop(ctx);
+        });
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    if (_usernameController.text.isEmpty && _passwordController.text.isNotEmpty) {
+      popup('Please enter your username');
+    } else if (_usernameController.text.isNotEmpty && _passwordController.text.isEmpty){
+      popup('Please enter your password');
+    }
+
+    if (_usernameController.text.isEmpty && _passwordController.text.isEmpty) {
+      popup('Please enter your username and password');
+    }
+
+  }
+
   void login() async {
     showDialog(
       context: context,
@@ -29,10 +56,11 @@ class _LoginState extends State<Login> {
       },
     );
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _usernameController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty)
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _usernameController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
       Navigator.pop(context);
       Navigator.push(
         context,
@@ -43,28 +71,33 @@ class _LoginState extends State<Login> {
       );
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
-      popup();
+      popup('Incorrect email or password');
     }
   }
 
-  void popup() {
+  void popup(String message) {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.04;
+
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return AlertDialog(
-              content: const Text(
-                'Incorrect email or password',
+              backgroundColor: Colors.white,
+              content: Text(
+                message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Colors.deepPurple,
-                    fontSize: 16
+                    color: Color(0xFF2A364E),
+                    fontSize: fontSize
                 ),
               ),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)
               ),
-              insetPadding: const EdgeInsets.only(right: 50, left: 50),
+              insetPadding: EdgeInsets.only(right: (0.1*width), left: (0.1*width)),
               actions: [
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -75,19 +108,19 @@ class _LoginState extends State<Login> {
                           child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                fixedSize: const Size(70, 35),
+                                fixedSize: Size((0.18*width), (0.02*height)),
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20)
                                 ),
                                 elevation: 2.0,
                               ),
-                              child: const Text(
+                              child: Text(
                                   'OK',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      color: Colors.deepPurple,
-                                      fontSize: 15,
+                                      color: Color(0xFF2A364E),
+                                      fontSize: fontSize,
                                       fontWeight: FontWeight.w400
                                   )
                               )
@@ -109,6 +142,13 @@ class _LoginState extends State<Login> {
         .then((value) => {FlutterNativeSplash.remove()}
     );
 
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -126,178 +166,229 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.03;
+
     return PopScope(
         canPop: false,
         child: Scaffold(
-            body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0.4, 1.0],
-                    colors: [
-                      Color(0xFFA97DE6),
-                      Color(0xFF83AFFA)
-                    ],
-                  ),
-                ),
+            backgroundColor: Colors.white,
+            body: SingleChildScrollView (
                 child: Center(
-                    child: SingleChildScrollView(
-                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-                        child: Column(
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(top: (0.1*height)),
-                                child: Image(
-                                  image: const AssetImage("assets/images/book.png"),
-                                  height: height * 0.15,
+                    child: Stack(
+                        alignment: Alignment.center,
+                        children: <Widget> [
+                          Positioned (
+                            top: 0,
+                            child: Container(
+                                width: width,
+                                height: 0.75*height,
+                                margin: EdgeInsets.only(bottom: (0.3*height)),
+                                decoration: BoxDecoration(
+                                    color: Color(0xFFC6F2FF),
+                                    borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(90),
+                                        bottomRight: Radius.circular(90)
+                                    )
                                 ),
-                              ),
-                              Container(
-                                  alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.only(top: (0.05*height), bottom: (0.05*height), left: (0.15*width)),
-                                  child: const Text(
-                                      'Login',
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                          fontFamily: "Montserrat",
-                                          fontSize: 40,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle: FontStyle.normal,
-                                          height: 1.75,
-                                          letterSpacing: 0.5,
-                                          color: Colors.white
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  padding: EdgeInsets.only(left: (0.15*width), right: (0.15*width)),
-                                  child: Form(
-                                      child: TextFormField(
-                                        style: const TextStyle(
-                                            color: Colors.white
+                                child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        margin: EdgeInsets.only(top: (0.08*height), bottom: (0.02*height)),
+                                        alignment: Alignment.topCenter,
+                                        child: Image(
+                                          image: const AssetImage("assets/images/icon1.png"),
+                                          height: height * 0.2,
                                         ),
-                                        controller: _usernameController,
-                                        maxLines: 1,
-                                        cursorColor: Colors.white,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Username',
-                                          hintStyle: TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                  )
-                              ),Container(
-                                  padding: EdgeInsets.only(left: (0.15*width), right: (0.15*width), top: (0.03*height)),
-                                  child: Form(
-                                      child: TextFormField(
-                                        controller: _passwordController,
-                                        obscureText: _securedPassword,
-                                        style: const TextStyle(
-                                            color: Colors.white
-                                        ),
-                                        maxLines: 1,
-                                        keyboardType: TextInputType.text,
-                                        textInputAction: TextInputAction.done,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                              RegExp('[A-Za-z0-9]')
+                                      ),
+                                      Container(
+                                          alignment: Alignment.topLeft,
+                                          margin: EdgeInsets.only(left: (0.15*width)),
+                                          child: Text(
+                                              'Login',
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                  fontFamily: "Montserrat",
+                                                  fontSize: fontSize*3,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontStyle: FontStyle.normal,
+                                                  height: 1.75,
+                                                  letterSpacing: 0.5,
+                                                  color: Color(0xFF2A364E)
+                                              )
                                           )
+                                      )
+                                    ]
+                                )
+                            ),
+                          ),
+                          Positioned (
+                              child: Container(
+                                  margin: EdgeInsets.only(top: (0.4*height), left: (0.09*width), right: (0.09*width)),
+                                  height: 0.55*height,
+                                  decoration: BoxDecoration(
+                                      color: Color(0xFFFFF8EA),
+                                      borderRadius: BorderRadius.all(Radius.circular(30))
+                                  ),
+                                  child: Center (
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                              margin: EdgeInsets.only(left: (0.1*width), right: (0.1*width)),
+                                              child: Form(
+                                                  child: TextFormField(
+                                                    style: const TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Color(0xFF2A364E)
+                                                    ),
+                                                    controller: _usernameController,
+                                                    maxLines: 1,
+                                                    cursorColor: Color(0xFF2A364E),
+                                                    decoration: const InputDecoration(
+                                                      hintText: 'Username',
+                                                      hintStyle: TextStyle(
+                                                          fontFamily: "Quicksand",
+                                                          fontWeight: FontWeight.w500,
+                                                          letterSpacing: 0.5,
+                                                          color: Color(0xFF2A364E)
+                                                      ),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Color(0xFF2A364E)
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                              )
+                                          ),
+                                          Container(
+                                              margin: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.03*height)),
+                                              child: Form(
+                                                  child: TextFormField(
+                                                    controller: _passwordController,
+                                                    obscureText: _securedPassword,
+                                                    enableInteractiveSelection: false,
+                                                    style: const TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Color(0xFF2A364E)
+                                                    ),
+                                                    maxLines: 1,
+                                                    keyboardType: TextInputType.text,
+                                                    textInputAction: TextInputAction.done,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.allow(
+                                                          RegExp('[A-Za-z0-9]')
+                                                      )
+                                                    ],
+                                                    cursorColor: Color(0xFF2A364E),
+                                                    decoration: InputDecoration(
+                                                      hintText: 'Password',
+                                                      hintStyle: const TextStyle(
+                                                          fontFamily: "Quicksand",
+                                                          fontWeight: FontWeight.w500,
+                                                          letterSpacing: 0.5,
+                                                          color: Color(0xFF2A364E)
+                                                      ),
+                                                      suffixIcon: togglePassword(),
+                                                      suffixIconColor: Color(0xFF2A364E),
+                                                      enabledBorder: const UnderlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Color(0xFF2A364E)
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                              )
+                                          ),
+                                          Container(
+                                              margin: EdgeInsets.only(top: (0.05*height), bottom: (0.12*height)),
+                                              child: ElevatedButton(
+                                                  onPressed: () {
+                                                    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+                                                      check();
+                                                    } else {
+                                                      login();
+                                                    }
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    fixedSize: const Size(200, 55),
+                                                    backgroundColor: Color(0xFFA986E4),
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(100)
+                                                    ),
+                                                    elevation: 2.0,
+                                                  ),
+                                                  child: Text('Login',
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                          fontFamily: "Quicksand",
+                                                          fontWeight: FontWeight.w600,
+                                                          letterSpacing: 0.5,
+                                                          color: Colors.white,
+                                                          fontSize: fontSize*1.75,
+                                                      )
+                                                  )
+                                              )
+                                          ),
+                                          Container(
+                                                    margin: EdgeInsets.only(bottom: (0.01*height)),
+                                                    child: Text(
+                                                        "Don't have an account?",
+                                                        textAlign: TextAlign.center,
+                                                        style: TextStyle(
+                                                            fontFamily: "Quicksand",
+                                                            fontWeight: FontWeight.w500,
+                                                            fontSize: fontSize*1.25,
+                                                            fontStyle: FontStyle.normal,
+                                                            height: 1.75,
+                                                            letterSpacing: 0.75,
+                                                            color: Colors.black
+                                                        )
+                                                    )
+                                                ),
+                                                Container(
+                                                    child: ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            PageTransition(
+                                                              type: PageTransitionType.fade,
+                                                              child: SignUp(),
+                                                            ),
+                                                          );
+                                                        },
+                                                        style: ElevatedButton.styleFrom(
+                                                          fixedSize: const Size(160, 50),
+                                                          backgroundColor: Color(0xFF49688D),
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(100)
+                                                          ),
+                                                          elevation: 2.0,
+                                                        ),
+                                                        child: Text(
+                                                            'Sign Up',
+                                                            textAlign: TextAlign.center,
+                                                            style: TextStyle(
+                                                              fontFamily: "Quicksand",
+                                                              fontWeight: FontWeight.w600,
+                                                              letterSpacing: 0.5,
+                                                              color: Colors.white,
+                                                              fontSize: fontSize*1.5,
+                                                            )
+                                                        )
+                                                    )
+                                                ),
                                         ],
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: 'Password',
-                                          hintStyle: const TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          suffixIcon: togglePassword(),
-                                          suffixIconColor: Colors.white,
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
                                       )
                                   )
-                              ),
-                              Container(
-                                  margin: EdgeInsets.only(top: (0.05*height), bottom: (0.15*height)),
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        login();
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        fixedSize: const Size(200, 55),
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(100)
-                                        ),
-                                        elevation: 2.0,
-                                      ),
-                                      child: const Text('Login',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: Color(0xFFB38AEE),
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500
-                                          )
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  margin: EdgeInsets.only(bottom: (0.01*height)),
-                                  child: const Text(
-                                      "Don't have an account?",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontStyle: FontStyle.normal,
-                                          height: 1.75,
-                                          letterSpacing: 0.75,
-                                          color: Colors.white
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  margin: EdgeInsets.only(bottom: (0.01*height)),
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          PageTransition(
-                                            type: PageTransitionType.fade,
-                                            child: SignUp(),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        fixedSize: const Size(160, 50),
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(100)
-                                        ),
-                                        elevation: 2.0,
-                                      ),
-                                      child: const Text(
-                                          'Sign Up',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: Color(0xFFB38AEE),
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500
-                                          )
-                                      )
-                                  )
-                              ),
-                            ]
-                        )
+                              )
+                          )
+                        ]
                     )
                 )
             )

@@ -14,10 +14,10 @@ class SignUp extends StatefulWidget {
 class _SignUpState extends State<SignUp> {
   bool _securedPassword = true;
   bool _securedPassword2 = true;
-  Color colour = Colors.white;
-  Color colour2 = Colors.white;
-  Color colour3 = Colors.white;
-  Color colour4 = Colors.white;
+  Color colour = Color(0xFF2A364E);
+  Color colour2 = Color(0xFF2A364E);
+  Color colour3 = Color(0xFF2A364E);
+  Color colour4 = Color(0xFF2A364E);
 
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -42,9 +42,9 @@ class _SignUpState extends State<SignUp> {
         _usernameController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty &&
         (!_passwordController.text.contains(RegExp('[A-Z]')) ||
-        !_passwordController.text.contains(RegExp('[a-z]')) ||
-        !_passwordController.text.contains(RegExp('[0-9]')) ||
-        _passwordController.text.length < 8)
+            !_passwordController.text.contains(RegExp('[a-z]')) ||
+            !_passwordController.text.contains(RegExp('[0-9]')) ||
+            _passwordController.text.length < 8)
     ) {
       popup('Password is too weak.');
     }
@@ -92,9 +92,9 @@ class _SignUpState extends State<SignUp> {
         _nameController.text.isNotEmpty &&
         _passwordController2.text.isNotEmpty) ||
         (_passwordController.text.isEmpty &&
-        _usernameController.text.isNotEmpty &&
-        _nameController.text.isNotEmpty &&
-        _passwordController2.text.isEmpty)
+            _usernameController.text.isNotEmpty &&
+            _nameController.text.isNotEmpty &&
+            _passwordController2.text.isEmpty)
     ) {
       popup('Please enter your password.');
     }
@@ -143,9 +143,9 @@ class _SignUpState extends State<SignUp> {
           _passwordController.text.length >= 8)
       {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: _usernameController.text,
-            password: _passwordController.text,
-          );
+          email: _usernameController.text,
+          password: _passwordController.text,
+        );
         Navigator.pop(context);
 
         Navigator.push(
@@ -154,7 +154,7 @@ class _SignUpState extends State<SignUp> {
               type: PageTransitionType.fade,
               child: HomePage(),
             )
-          );
+        );
       }
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
@@ -171,23 +171,28 @@ class _SignUpState extends State<SignUp> {
   }
 
   void popup(String message) {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.04;
+
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return AlertDialog(
+              backgroundColor: Colors.white,
               content: Text(
                 message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Colors.deepPurple,
-                    fontSize: 16
+                    color: Color(0xFF2A364E),
+                    fontSize: fontSize
                 ),
               ),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)
               ),
-              insetPadding: const EdgeInsets.only(right: 50, left: 50),
+              insetPadding: EdgeInsets.only(right: (0.1*width), left: (0.1*width)),
               actions: [
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -198,19 +203,19 @@ class _SignUpState extends State<SignUp> {
                           child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                fixedSize: const Size(70, 35),
+                                fixedSize: Size((0.18*width), (0.02*height)),
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20)
                                 ),
                                 elevation: 2.0,
                               ),
-                              child: const Text(
+                              child: Text(
                                   'OK',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      color: Colors.deepPurple,
-                                      fontSize: 15,
+                                      color: Color(0xFF2A364E),
+                                      fontSize: fontSize,
                                       fontWeight: FontWeight.w400
                                   )
                               )
@@ -227,6 +232,13 @@ class _SignUpState extends State<SignUp> {
   @override
   void initState() {
     super.initState();
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -246,277 +258,340 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.03;
+
     return PopScope(
         canPop: false,
         child: Scaffold(
             floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
             floatingActionButton: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: Color(0xFF2A364E)),
               onPressed: () => Navigator.pop(context),
             ),
-            body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0.4, 1.0],
-                    colors: [
-                      Color(0xFFA97DE6),
-                      Color(0xFF83AFFA)
+            backgroundColor: Colors.white,
+            body: SingleChildScrollView(
+                child: Center(
+                  child: Stack(
+                    children: <Widget>[
+                      Positioned(
+                          top: 0,
+                          child: Container(
+                            width: width,
+                            height: 0.75*height,
+                            margin: EdgeInsets.only(bottom: (0.3*height)),
+                            decoration: BoxDecoration(
+                                color: Color(0xFFC6F2FF),
+                                borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(90),
+                                    bottomRight: Radius.circular(90)
+                                )
+                            ),
+                            child: Container(
+                                alignment: Alignment.topLeft,
+                                margin: EdgeInsets.only(top: (0.12*height), left: (0.15*width)),
+                                child: Text(
+                                    'Create \nAccount',
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                        fontFamily: "Montserrat",
+                                        fontSize: fontSize*2.75,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.normal,
+                                        height: 1.2,
+                                        letterSpacing: 0.5,
+                                        color: Color(0xFF2A364E)
+                                    )
+                                )
+                            ),
+                          )
+                      ),
+                      Positioned(
+                          child: Container (
+                              margin: EdgeInsets.only(bottom: 0, top: (0.25*height), left: (0.09*width), right: (0.09*width)),
+                              height: 0.65*height,
+                              decoration: BoxDecoration(
+                                  color: Color(0xFFFFF8EA),
+                                  borderRadius: BorderRadius.all(Radius.circular(30))
+                              ),
+                              child: Center(
+                                  child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                            padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width)),
+                                            child: Form(
+                                                child: TextFormField(
+                                                  style: const TextStyle(
+                                                      fontFamily: "Quicksand",
+                                                      fontWeight: FontWeight.w500,
+                                                      letterSpacing: 0.5,
+                                                      color: Color(0xFF2A364E)
+                                                  ),
+                                                  controller: _nameController,
+                                                  maxLines: 1,
+                                                  cursorColor: Color(0xFF2A364E),
+                                                  decoration: const InputDecoration(
+                                                    hintText: 'Name',
+                                                    hintStyle: TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Color(0xFF2A364E)
+                                                    ),
+                                                    enabledBorder: UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Color(0xFF2A364E)
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                            )
+                                        ),
+                                        Container(
+                                            padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.02*height)),
+                                            child: Form(
+                                                child: TextFormField(
+                                                  style: const TextStyle(
+                                                      fontFamily: "Quicksand",
+                                                      fontWeight: FontWeight.w500,
+                                                      letterSpacing: 0.5,
+                                                      color: Color(0xFF2A364E)
+                                                  ),
+                                                  controller: _usernameController,
+                                                  maxLines: 1,
+                                                  cursorColor: Color(0xFF2A364E),
+                                                  decoration: const InputDecoration(
+                                                    hintText: 'Email',
+                                                    hintStyle: TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Color(0xFF2A364E)
+                                                    ),
+                                                    enabledBorder: UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Color(0xFF2A364E)
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                            )
+                                        ),
+                                        Container(
+                                            padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.02*height)),
+                                            child: Form(
+                                                child: TextFormField(
+                                                  controller: _passwordController,
+                                                  obscureText: _securedPassword,
+                                                  enableSuggestions: false,
+                                                  enableInteractiveSelection: false,
+                                                  autocorrect: false,
+                                                  style: TextStyle(
+                                                      fontFamily: "Quicksand",
+                                                      fontWeight: FontWeight.w500,
+                                                      letterSpacing: 0.5,
+                                                      color: Color(0xFF2A364E)
+                                                  ),
+                                                  maxLines: 1,
+                                                  keyboardType: TextInputType.text,
+                                                  textInputAction: TextInputAction.done,
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(
+                                                        RegExp('[A-Za-z0-9]')
+                                                    )
+                                                  ],
+                                                  cursorColor: Color(0xFF2A364E),
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Password',
+                                                    hintStyle: const TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Color(0xFF2A364E)
+                                                    ),
+                                                    suffixIcon: togglePassword(),
+                                                    suffixIconColor: Color(0xFF2A364E),
+                                                    enabledBorder: const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Color(0xFF2A364E)
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      value = _passwordController.text;
+                                                      if (value.contains(RegExp('[A-Z]'))) {
+                                                        colour = Colors.green.shade700;
+                                                      } else {
+                                                        colour = Colors.red.shade900;
+                                                      }
+
+                                                      if (value.contains(RegExp('[a-z]'))) {
+                                                        colour2 = Colors.green.shade700;
+                                                      } else {
+                                                        colour2 = Colors.red.shade900;
+                                                      }
+
+                                                      if (value.contains(RegExp('[0-9]'))) {
+                                                        colour3 = Colors.green.shade700;
+                                                      } else {
+                                                        colour3 = Colors.red.shade900;
+                                                      }
+
+                                                      if (value.length >= 8) {
+                                                        colour4 = Colors.green.shade700;
+                                                      } else {
+                                                        colour4 = Colors.red.shade900;
+                                                      }
+                                                    });
+                                                  },
+                                                )
+                                            )
+                                        ),
+                                        Container(
+                                            padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.02*height)),
+                                            child: Form(
+                                                child: TextFormField(
+                                                  controller: _passwordController2,
+                                                  obscureText: _securedPassword2,
+                                                  enableSuggestions: false,
+                                                  enableInteractiveSelection: false,
+                                                  style: TextStyle(
+                                                      fontFamily: "Quicksand",
+                                                      fontWeight: FontWeight.w500,
+                                                      letterSpacing: 0.5,
+                                                      color: Color(0xFF2A364E)
+                                                  ),
+                                                  maxLines: 1,
+                                                  keyboardType: TextInputType.text,
+                                                  textInputAction: TextInputAction.done,
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(
+                                                        RegExp('[A-Za-z0-9]')
+                                                    )
+                                                  ],
+                                                  cursorColor: Color(0xFF2A364E),
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Confirm Password',
+                                                    hintStyle: const TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Color(0xFF2A364E)
+                                                    ),
+                                                    suffixIcon: togglePassword2(),
+                                                    suffixIconColor: Color(0xFF2A364E),
+                                                    enabledBorder: const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Color(0xFF2A364E)
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                            )
+                                        ),
+                                        Container (
+                                            margin: EdgeInsets.only(top: (0.05*height), left: (0.1*width)),
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              'An uppercase character',
+                                              style: TextStyle(
+                                                  fontSize: fontSize*1.1,
+                                                  fontFamily: "Quicksand",
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 0.5,
+                                                  color: colour
+                                              ),
+                                            )
+                                        ),
+                                        Container (
+                                            margin: EdgeInsets.only(top: (0.005*height), left: (0.1*width)),
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              'A lowercase character',
+                                              style: TextStyle(
+                                                  fontSize: fontSize*1.1,
+                                                  fontFamily: "Quicksand",
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 0.5,
+                                                  color: colour2
+                                              ),
+                                            )
+                                        ),
+                                        Container (
+                                            margin: EdgeInsets.only(top: (0.005*height), left: (0.1*width)),
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              'A number',
+                                              style: TextStyle(
+                                                  fontSize: fontSize*1.1,
+                                                  fontFamily: "Quicksand",
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 0.5,
+                                                  color: colour3
+                                              ),
+                                            )
+                                        ),
+                                        Container (
+                                            margin: EdgeInsets.only(top: (0.005*height), left: (0.1*width)),
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              'At least 8 characters',
+                                              style: TextStyle(
+                                                  fontSize: fontSize*1.1,
+                                                  fontFamily: "Quicksand",
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 0.5,
+                                                  color: colour4
+                                              ),
+                                            )
+                                        ),
+                                        Container(
+                                            margin: EdgeInsets.only(top: (0.05*height)),
+                                            child: ElevatedButton(
+                                                onPressed: () {
+                                                  if (_passwordController.text != _passwordController2.text ||
+                                                      !_passwordController.text.contains(RegExp('[A-Z]')) ||
+                                                      !_passwordController.text.contains(RegExp('[a-z]')) ||
+                                                      !_passwordController.text.contains(RegExp('[0-9]')) ||
+                                                      _passwordController.text.length < 8 ||
+                                                      _nameController.text.isEmpty ||
+                                                      _passwordController.text.isEmpty ||
+                                                      _passwordController2.text.isEmpty ||
+                                                      _usernameController.text.isEmpty)
+                                                  {
+                                                    checkValidation();
+                                                  } else {
+                                                    signup();
+                                                  }
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  fixedSize: const Size(200, 55),
+                                                  backgroundColor: Color(0xFF49688D),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(100)
+                                                  ),
+                                                  elevation: 2.0,
+                                                ),
+                                                child: Text('Sign Up',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontFamily: "Quicksand",
+                                                      fontWeight: FontWeight.w600,
+                                                      letterSpacing: 0.5,
+                                                      color: Colors.white,
+                                                      fontSize: fontSize*1.75,
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                      ]
+                                  )
+                              )
+                          )
+                      )
                     ],
                   ),
-                ),
-                child: Center(
-                    child: SingleChildScrollView(
-                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-                        child: Column(
-                            children: <Widget>[
-                              Container(
-                                  alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.only(bottom: (0.05*height), left: (0.15*width)),
-                                  child: const Text(
-                                      'Create \nAccount',
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                          fontFamily: "Montserrat",
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle: FontStyle.normal,
-                                          height: 1.2,
-                                          letterSpacing: 0.5,
-                                          color: Colors.white
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  padding: EdgeInsets.only(left: (0.15*width), right: (0.15*width)),
-                                  child: Form(
-                                      child: TextFormField(
-                                        style: const TextStyle(
-                                            color: Colors.white
-                                        ),
-                                        controller: _nameController,
-                                        maxLines: 1,
-                                        cursorColor: Colors.white,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Name',
-                                          hintStyle: TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  padding: EdgeInsets.only(left: (0.15*width), right: (0.15*width), top: (0.02*height)),
-                                  child: Form(
-                                      child: TextFormField(
-                                        style: const TextStyle(
-                                            color: Colors.white
-                                        ),
-                                        controller: _usernameController,
-                                        maxLines: 1,
-                                        cursorColor: Colors.white,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Email',
-                                          hintStyle: TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  padding: EdgeInsets.only(left: (0.15*width), right: (0.15*width), top: (0.02*height)),
-                                  child: Form(
-                                      child: TextFormField(
-                                        controller: _passwordController,
-                                        obscureText: _securedPassword,
-                                        enableSuggestions: false,
-                                        enableInteractiveSelection: false,
-                                        autocorrect: false,
-                                        style: TextStyle(
-                                            color: Colors.white
-                                        ),
-                                        maxLines: 1,
-                                        keyboardType: TextInputType.text,
-                                        textInputAction: TextInputAction.done,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                              RegExp('[A-Za-z0-9]')
-                                          )
-                                        ],
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: 'Password',
-                                          hintStyle: const TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          suffixIcon: togglePassword(),
-                                          suffixIconColor: Colors.white,
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            value = _passwordController.text;
-                                            if (value.contains(RegExp('[A-Z]'))) {
-                                              colour = Colors.green.shade700;
-                                            } else {
-                                              colour = Colors.red.shade900;
-                                            }
-
-                                            if (value.contains(RegExp('[a-z]'))) {
-                                              colour2 = Colors.green.shade700;
-                                            } else {
-                                              colour2 = Colors.red.shade900;
-                                            }
-
-                                            if (value.contains(RegExp('[0-9]'))) {
-                                              colour3 = Colors.green.shade700;
-                                            } else {
-                                              colour3 = Colors.red.shade900;
-                                            }
-
-                                            if (value.length >= 8) {
-                                              colour4 = Colors.green.shade700;
-                                            } else {
-                                              colour4 = Colors.red.shade900;
-                                            }
-                                          });
-                                        },
-                                      )
-                                  )
-                              ),
-                              Container(
-                                  padding: EdgeInsets.only(left: (0.15*width), right: (0.15*width), top: (0.02*height)),
-                                  child: Form(
-                                      child: TextFormField(
-                                        controller: _passwordController2,
-                                        obscureText: _securedPassword2,
-                                        enableSuggestions: false,
-                                        enableInteractiveSelection: false,
-                                        style: TextStyle(
-                                            color: Colors.white
-                                        ),
-                                        maxLines: 1,
-                                        keyboardType: TextInputType.text,
-                                        textInputAction: TextInputAction.done,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                              RegExp('[A-Za-z0-9]')
-                                          )
-                                        ],
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: 'Confirm Password',
-                                          hintStyle: const TextStyle(
-                                              color: Colors.white
-                                          ),
-                                          suffixIcon: togglePassword2(),
-                                          suffixIconColor: Colors.white,
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                  )
-                              ),
-                              Container (
-                                margin: EdgeInsets.only(top: (0.03*height), left: (0.15*width)),
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'An uppercase character',
-                                  style: TextStyle(
-                                      color: colour
-                                  ),
-                                )
-                              ),
-                              Container (
-                                  margin: EdgeInsets.only(top: (0.005*height), left: (0.15*width)),
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'A lowercase character',
-                                    style: TextStyle(
-                                        color: colour2
-                                    ),
-                                  )
-                              ),
-                              Container (
-                                  margin: EdgeInsets.only(top: (0.005*height), left: (0.15*width)),
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'A number',
-                                    style: TextStyle(
-                                        color: colour3
-                                    ),
-                                  )
-                              ),
-                              Container (
-                                  margin: EdgeInsets.only(top: (0.005*height), left: (0.15*width)),
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'At least 8 characters',
-                                    style: TextStyle(
-                                        color: colour4
-                                    ),
-                                  )
-                              ),
-                              Container(
-                                  margin: EdgeInsets.only(top: (0.05*height)),
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_passwordController.text != _passwordController2.text ||
-                                            !_passwordController.text.contains(RegExp('[A-Z]')) ||
-                                            !_passwordController.text.contains(RegExp('[a-z]')) ||
-                                            !_passwordController.text.contains(RegExp('[0-9]')) ||
-                                            _passwordController.text.length < 8 ||
-                                            _nameController.text.isEmpty ||
-                                            _passwordController.text.isEmpty ||
-                                            _passwordController2.text.isEmpty ||
-                                            _usernameController.text.isEmpty)
-                                        {
-                                          checkValidation();
-                                        } else {
-                                          signup();
-                                        }
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        fixedSize: const Size(200, 55),
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(100)
-                                        ),
-                                        elevation: 2.0,
-                                      ),
-                                      child: const Text('Sign Up',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: Color(0xFFB38AEE),
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500
-                                          )
-                                      )
-                                  )
-                              ),
-                            ]
-                        )
-                    )
                 )
             )
         )
