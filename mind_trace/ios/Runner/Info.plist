@@ -49,5 +49,15 @@
 		<false/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSFileProviderDomainAllVolumes</key>
+        <array>
+            <string>$(TeamIdentifierPrefix)your_team_id</string>
+        </array>
+        <key>LSSupportsOpeningDocumentsInPlace</key>
+        <true/>
+        <key>UIFileSharingEnabled</key>
+        <true/>
+        <key>ITSAppUsesNonExemptEncryption</key>
+        <false/>
 	</dict>
 </plist>

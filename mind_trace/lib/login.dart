@@ -49,6 +49,7 @@ class _LoginState extends State<Login> {
   void login() async {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return const Center(
           child: CircularProgressIndicator(),

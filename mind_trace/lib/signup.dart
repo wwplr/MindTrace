@@ -403,13 +403,6 @@ class _SignUpState extends State<SignUp> {
                                                       color: Color(0xFF2A364E)
                                                   ),
                                                   maxLines: 1,
-                                                  keyboardType: TextInputType.text,
-                                                  textInputAction: TextInputAction.done,
-                                                  inputFormatters: [
-                                                    FilteringTextInputFormatter.allow(
-                                                        RegExp('[A-Za-z0-9]')
-                                                    )
-                                                  ],
                                                   cursorColor: Color(0xFF2A364E),
                                                   decoration: InputDecoration(
                                                     hintText: 'Password',
@@ -475,13 +468,6 @@ class _SignUpState extends State<SignUp> {
                                                       color: Color(0xFF2A364E)
                                                   ),
                                                   maxLines: 1,
-                                                  keyboardType: TextInputType.text,
-                                                  textInputAction: TextInputAction.done,
-                                                  inputFormatters: [
-                                                    FilteringTextInputFormatter.allow(
-                                                        RegExp('[A-Za-z0-9]')
-                                                    )
-                                                  ],
                                                   cursorColor: Color(0xFF2A364E),
                                                   decoration: InputDecoration(
                                                     hintText: 'Confirm Password',
