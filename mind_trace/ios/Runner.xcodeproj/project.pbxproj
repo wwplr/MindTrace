@@ -55,6 +55,7 @@
 
 /* Begin PBXFileReference section */
 		05005BE3A2E7680BAFDF37AA /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
+		112CFDA72BB4D55E00275A27 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		11C5AB272B8451CC00BFB457 /* MindTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindTrace.swift; sourceTree = "<group>"; };
 		11C5AB292B8451CC00BFB457 /* TotalActivityReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TotalActivityReport.swift; sourceTree = "<group>"; };
 		11C5AB2B2B8451CC00BFB457 /* TotalActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TotalActivityView.swift; sourceTree = "<group>"; };
@@ -185,6 +186,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				112CFDA72BB4D55E00275A27 /* Runner.entitlements */,
 				11DFCF602B7AD9FC008846A5 /* GoogleService-Info.plist */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
@@ -506,6 +508,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = XB96W4N644;
 				ENABLE_BITCODE = NO;
@@ -686,6 +689,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = XB96W4N644;
 				ENABLE_BITCODE = NO;
@@ -710,6 +714,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = XB96W4N644;
 				ENABLE_BITCODE = NO;

@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
               onTap: bottomNavBar,
               items: [
                 CurvedNavigationBarItem (
-                    child: Icon(Icons.home),
+                    child: Icon(Icons.bar_chart),
                 ),
                 CurvedNavigationBarItem (
                   child: Icon(Icons.add),

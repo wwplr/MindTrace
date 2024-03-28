@@ -10,7 +10,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int touchedIndex = -1;
   final Color barBackgroundColor = Colors.transparent;
-  final Color barColor = Colors.blue;
+  final Color barColor = Colors.white;
   final Color touchedBarColor = Colors.blue;
 
   @override
@@ -60,7 +60,7 @@ class _HomeState extends State<Home> {
                                           text: 'High',
                                           color: Colors.green,
                                           space: 0.01*width,
-                                          fontSize: fontSize*1.2,
+                                          fontSize: fontSize*1.3,
                                           width: 0.015*width,
                                           height: 0.015*width
                                       ),
@@ -69,7 +69,7 @@ class _HomeState extends State<Home> {
                                           text: 'OK',
                                           color: Colors.yellow,
                                           space: 0.01*width,
-                                          fontSize: fontSize*1.2,
+                                          fontSize: fontSize*1.3,
                                           width: 0.015*width,
                                           height: 0.015*width
                                       ),
@@ -78,7 +78,7 @@ class _HomeState extends State<Home> {
                                           text: 'Low',
                                           color: Colors.red,
                                           space: 0.01*width,
-                                          fontSize: fontSize*1.2,
+                                          fontSize: fontSize*1.3,
                                           width: 0.015*width,
                                           height: 0.015*width
                                       ),
@@ -91,7 +91,7 @@ class _HomeState extends State<Home> {
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 8),
                                         child: BarChart(
-                                          mainBarData(),
+                                          mainBarData(height, width, fontSize),
                                         ),
                                       ),
                                     )
@@ -109,13 +109,13 @@ class _HomeState extends State<Home> {
   }
 
   static const mainItems = <int, List<double>>{
-    0: [3, 2, 3],
+    0: [3, 2, 3, 3, 2, 1],
     1: [2, 1, 2, 3],
     2: [2, 2, 3, 2],
-    3: [2, 2, 3],
-    4: [3, 2, 3, 3],
+    3: [2, 2, 3, 2, 2, 3, 2],
+    4: [3, 2, 3, 3, 2],
     5: [3, 1, 2, 2],
-    6: [2, 2, 3, 2],
+    6: [2, 2, 3],
   };
 
   Color getMoodColor(double value) {
@@ -171,7 +171,7 @@ class _HomeState extends State<Home> {
     }).toList();
   }
 
-  BarChartData mainBarData() {
+  BarChartData mainBarData(double height, double width, double fontSize) {
     return BarChartData(
       barTouchData: BarTouchData(
         touchTooltipData: BarTouchTooltipData(
@@ -181,10 +181,10 @@ class _HomeState extends State<Home> {
           getTooltipItem: (group, groupIndex, rod, rodIndex) {
             return BarTooltipItem(
               'Categories',
-              const TextStyle(
+              TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: fontSize * 1.1,
               ),
             );
           },
@@ -238,7 +238,8 @@ class _HomeState extends State<Home> {
   Widget getTitles(double value, TitleMeta meta) {
     const style = TextStyle(
       color: Colors.black,
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w600,
+      fontFamily: "Quicksand",
       fontSize: 14,
     );
     Widget text;
