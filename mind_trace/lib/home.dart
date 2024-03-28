@@ -43,7 +43,7 @@ class _HomeState extends State<Home> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  'Mood Insights',
+                                  'Mood Progression',
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: fontSize*2,

@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:io';
+
 
 class Add extends StatefulWidget {
   const Add({Key? key}) : super(key: key);
@@ -38,37 +40,55 @@ class _AddState extends State<Add> {
     ]);
   }
 
-  Future<void> pickFile() async {
+  Future<void> pickFile(double fontSize) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       File file = File(result.files.single.path!);
 
       // Now you have the file, you can send it to Python
-      await sendToPython(file);
+      await sendToPython(file, fontSize);
     } else {
       print("User canceled file picking");
     }
   }
 
-  Future<void> sendToPython(File file) async {
-    String pythonScriptUrl = 'http://127.0.0.1:5000/';
+  Future<void> sendToPython(File file, double fontSize) async {
+    String pythonScriptUrl = 'http://16.170.236.95:5000/';
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
+        return AlertDialog(
+            backgroundColor: Colors.white,
+            content: Text(
+                "This might take a few minutes. Please don't leave the app.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Color(0xFF2A364E),
+                    fontSize: fontSize*1.45,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w600
+                )
+            ),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)
+            ),
+            insetPadding: EdgeInsets.only(right: (3*fontSize), left: (3*fontSize)),
+            actions: [
+              Center(
+                  child: CircularProgressIndicator()
+              )
+            ]
         );
       },
     );
 
     try {
       // Create a multipart request
-      var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl));
-
-      // Attach the file to the request
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl))
+        ..fields['timestamp_r'] = '2024-01-23 12:11:49'
+        ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
       // Send the request
       var response = await request.send();
@@ -116,7 +136,8 @@ class _AddState extends State<Add> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Color(0xFF2A364E),
-                    fontSize: fontSize
+                    fontSize: fontSize,
+                    fontFamily: 'Quicksand',
                 ),
               ),
               shape: RoundedRectangleBorder(
@@ -387,7 +408,7 @@ class _AddState extends State<Add> {
                           margin: EdgeInsets.only(top: height*0.05),
                           child: ElevatedButton (
                               onPressed: () async {
-                                await pickFile();
+                                await pickFile(fontSize);
                               },
                               child: Text(
                                   'Choose File',
