@@ -4,9 +4,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:mind_trace/slider.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 
+class TimerProvider extends ChangeNotifier {
+  late Timer _timer;
+  bool _isSubmitted = false;
+  bool get isSubmitted => _isSubmitted;
+  bool _start = true;
+  bool get start => _start;
+  Timer get timer => _timer;
+
+  void setStart(bool value) {
+    _start = value;
+    notifyListeners();
+  }
+
+
+  void setSubmit(bool value) {
+    _isSubmitted = value;
+    notifyListeners();
+  }
+
+  void startTimer() {
+    _isSubmitted = true;
+    notifyListeners();
+
+    _timer = Timer(Duration(seconds: 5), () {
+      _isSubmitted = false;
+      notifyListeners();
+    });
+  }
+
+  void stopTimer() {
+    _timer.cancel();
+    notifyListeners();
+  }
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
 
 class Add extends StatefulWidget {
   const Add({Key? key}) : super(key: key);
@@ -28,7 +69,8 @@ class _AddState extends State<Add> {
   bool isSelected = false;
   bool isSelected2 = false;
   bool isSelected3 = false;
-  bool isSubmitted = false;
+  bool start = true;
+
 
   @override
   void initState() {
@@ -135,9 +177,9 @@ class _AddState extends State<Add> {
                 'Please select an option.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Color(0xFF2A364E),
-                    fontSize: fontSize,
-                    fontFamily: 'Quicksand',
+                  color: Color(0xFF2A364E),
+                  fontSize: fontSize,
+                  fontFamily: 'Quicksand',
                 ),
               ),
               shape: RoundedRectangleBorder(
@@ -180,6 +222,340 @@ class _AddState extends State<Add> {
     );
   }
 
+  Widget moodBox(BuildContext context, double fontSize, double width, double height) {
+    if (Provider.of<TimerProvider>(context).isSubmitted == true) {
+      iconColor = Colors.grey.shade800;
+      iconColor2 = Colors.grey.shade800;
+      iconColor3 = Colors.grey.shade800;
+      circleColor = Colors.white60;
+      circleColor2 = Colors.white60;
+      circleColor3 = Colors.white60;
+      isSelected = false;
+      isSelected2 = false;
+      isSelected3 = false;
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Come back in 20 minutes.',
+            style: TextStyle(
+              fontFamily: 'Quicksand',
+              fontSize: fontSize * 1.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: height*0.025, bottom:height*0.025),
+            child: Text(
+              'OR',
+              style: TextStyle(
+                fontFamily: 'Quicksand',
+                fontSize: fontSize * 1.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Container(
+              child: ElevatedButton (
+                  onPressed: () {
+                    Provider.of<TimerProvider>(context, listen: false).stopTimer();
+                    Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
+                    Provider.of<TimerProvider>(context, listen: false).setStart(true);
+                  },
+                  child: Text(
+                      'Finish',
+                      style: TextStyle(
+                        fontFamily: "Quicksand",
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        color: Color(0xFF49688D),
+                        fontSize: fontSize * 1.4,
+                      )
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(0.28 * width, 0.04 * height),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100)
+                    ),
+                    elevation: 2.0,
+                  )
+              )
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                      'How are you feeling?',
+                      style: TextStyle(
+                        fontFamily: 'Quicksand',
+                        fontSize: fontSize*1.5,
+                        fontWeight: FontWeight.w500,
+                      )
+                  ),
+                  Container(
+                      width: width*0.8,
+                      height: height*0.11,
+                      margin: EdgeInsets.only(top: height*0.02),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    width: isSelected ? width * 0.14 : width * 0.12,
+                                    height: isSelected ? width * 0.14 : width * 0.12,
+                                    decoration: ShapeDecoration(
+                                      color: circleColor,
+                                      shape: CircleBorder(),
+                                    ),
+                                    child: IconButton(
+                                      isSelected: isSelected,
+                                      icon: const Icon(Icons.sentiment_very_dissatisfied),
+                                      iconSize: isSelected ? width * 0.1 : width * 0.08,
+                                      color: iconColor,
+                                      onPressed: () {
+                                        setState(() {
+                                          isSelected = true;
+                                          isSelected2 = false;
+                                          isSelected3 = false;
+                                          selectedEmoji = 'Low';
+                                          iconColor = Colors.white;
+                                          iconColor2 = Colors.grey.shade800;
+                                          iconColor3 = Colors.grey.shade800;
+                                          circleColor = Colors.deepPurple;
+                                          circleColor2 = Colors.white60;
+                                          circleColor3 = Colors.white60;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Text(
+                                    'Low',
+                                    style: TextStyle(
+                                      fontSize: fontSize * 1.2,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              SizedBox(width: width * 0.1),
+                              Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    width: isSelected2 ? width * 0.14 : width * 0.12,
+                                    height: isSelected2 ? width * 0.14 : width * 0.12,
+                                    decoration: ShapeDecoration(
+                                      color: circleColor2,
+                                      shape: CircleBorder(),
+                                    ),
+                                    child: IconButton(
+                                      isSelected: isSelected2,
+                                      icon: Icon(Icons.sentiment_neutral),
+                                      iconSize: isSelected2 ? width * 0.1 : width * 0.08,
+                                      color: iconColor2,
+                                      splashColor: Colors.grey,
+                                      onPressed: () {
+                                        setState(() {
+                                          isSelected = false;
+                                          isSelected2 = true;
+                                          isSelected3 = false;
+                                          selectedEmoji = 'OK';
+                                          iconColor = Colors.grey.shade800;
+                                          iconColor2 = Colors.white;
+                                          iconColor3 = Colors.grey.shade800;
+                                          circleColor = Colors.white60;
+                                          circleColor2 = Colors.deepPurple;
+                                          circleColor3 = Colors.white60;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Text(
+                                    'OK',
+                                    style: TextStyle(
+                                      fontSize: fontSize * 1.2,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              SizedBox(width: width * 0.1),
+                              Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    width: isSelected3 ? width * 0.14 : width * 0.12,
+                                    height: isSelected3 ? width * 0.14 : width * 0.12,
+                                    decoration: ShapeDecoration(
+                                      color: circleColor3,
+                                      shape: CircleBorder(),
+                                    ),
+                                    child: IconButton(
+                                      isSelected: isSelected3,
+                                      icon: Icon(Icons.sentiment_very_satisfied),
+                                      iconSize: isSelected3 ? width * 0.1 : width * 0.08,
+                                      color: iconColor3,
+                                      onPressed: () {
+                                        setState(() {
+                                          isSelected = false;
+                                          isSelected2 = false;
+                                          isSelected3 = true;
+                                          selectedEmoji = 'High';
+                                          iconColor = Colors.grey.shade800;
+                                          iconColor2 = Colors.grey.shade800;
+                                          iconColor3 = Colors.white;
+                                          circleColor = Colors.white60;
+                                          circleColor2 = Colors.white60;
+                                          circleColor3 = Colors.deepPurple;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Text(
+                                    'High',
+                                    style: TextStyle(
+                                      fontSize: fontSize * 1.2,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
+                                ],
+                              )
+                            ],
+                          )
+                        ],
+                      )
+                  ),
+                ],
+              )
+          ),
+          Container(
+              margin: EdgeInsets.only(top: height*0.02),
+              child: ElevatedButton (
+                  onPressed: () async {
+                    if (isSelected==true || isSelected2==true || isSelected3==true) {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid.toString())
+                          .set({formatTimestamp(Timestamp.now()).toString(): selectedEmoji},
+                          SetOptions(merge: true)
+                      );
+                      Provider.of<TimerProvider>(context, listen: false).startTimer();
+                    } else {
+                      popup();
+                    }
+                  },
+                  child: Text(
+                      'Submit',
+                      style: TextStyle(
+                        fontFamily: "Quicksand",
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        color: Color(0xFF49688D),
+                        fontSize: fontSize * 1.4,
+                      )
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(0.28 * width, 0.04 * height),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100)
+                    ),
+                    elevation: 2.0,
+                  )
+              )
+          ),
+          Container(
+            margin: EdgeInsets.only(top: height*0.005),
+            child: GestureDetector(
+              onTap: () {
+                Provider.of<TimerProvider>(context, listen: false).setStart(true);
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: fontSize*1.2,
+                  fontFamily: 'Quicksand',
+                  decoration: TextDecoration.underline
+                )
+              )
+            )
+          )
+        ],
+      );
+    }
+  }
+
+  Widget moodBox2(BuildContext context, double fontSize, double width, double height) {
+    iconColor = Colors.grey.shade800;
+    iconColor2 = Colors.grey.shade800;
+    iconColor3 = Colors.grey.shade800;
+    circleColor = Colors.white60;
+    circleColor2 = Colors.white60;
+    circleColor3 = Colors.white60;
+    isSelected = false;
+    isSelected2 = false;
+    isSelected3 = false;
+    Provider.of<TimerProvider>(context).isSubmitted == false;
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Are you watching TikTok?',
+            style: TextStyle(
+              fontFamily: 'Quicksand',
+              fontSize: fontSize * 1.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: height*0.025),
+              child: ElevatedButton (
+                  onPressed: ()  {
+                    Provider.of<TimerProvider>(context, listen: false).setStart(false);
+                  },
+                  child: Text(
+                      'Yes',
+                      style: TextStyle(
+                        fontFamily: "Quicksand",
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        color: Color(0xFF49688D),
+                        fontSize: fontSize * 1.4,
+                      )
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(0.28 * width, 0.04 * height),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100)
+                    ),
+                    elevation: 2.0,
+                  )
+              )
+          ),
+        ],
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -189,263 +565,131 @@ class _AddState extends State<Add> {
     return PopScope(
         canPop: false,
         child: Scaffold(
-            body: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        width: width * 0.8,
-                        height: height * 0.3,
-                        child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Color(0xFFC9B4ED),
-                                borderRadius: BorderRadius.all(Radius.circular(30))
+            body: SingleChildScrollView(
+                child: Center(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(top: height*0.1),
+                            child: SizedBox(
+                              width: width * 0.8,
+                              height: height * 0.3,
+                              child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                      color: Color(0xFFC9B4ED),
+                                      borderRadius: BorderRadius.all(Radius.circular(30))
+                                  ),
+                                  child: Provider.of<TimerProvider>(context).start ? moodBox2(context, fontSize, width, height) : moodBox(context, fontSize, width, height)
+                              ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                            'How are you feeling?',
-                                            style: TextStyle(
-                                              fontFamily: 'Quicksand',
-                                              fontSize: fontSize*1.5,
-                                              fontWeight: FontWeight.w500,
-                                            )
+                          ),
+                          Container(
+                              margin: EdgeInsets.only(top: height*0.05),
+                              child: Column(
+                                children: [
+                                  Container(
+                                      margin: EdgeInsets.only(left: width*0.125, right: width*0.125),
+                                      child: Text(
+                                        "Tap the 'i' icon to see how to download your TikTok browsing history.",
+                                      )
+                                  )
+                                ],
+                              )
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(top: height*0.02),
+                                  child: ElevatedButton (
+                                      onPressed: () async {
+                                        await pickFile(fontSize);
+                                      },
+                                      child: Text(
+                                          'Choose File',
+                                          style: TextStyle(
+                                            fontFamily: "Quicksand",
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.5,
+                                            color: Colors.white,
+                                            fontSize: fontSize * 1.6,
+                                          )
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        fixedSize: Size(0.45 * width, 0.06 * height),
+                                        backgroundColor: Color(0xFF49688D),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(100)
                                         ),
-                                        Container(
-                                            width: width*0.8,
-                                            height: height*0.11,
-                                            margin: EdgeInsets.only(top: height*0.025),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: <Widget>[
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                  children: [
-                                                    Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      children: [
-                                                        AnimatedContainer(
-                                                          duration: Duration(milliseconds: 300),
-                                                          width: isSelected ? width * 0.14 : width * 0.12,
-                                                          height: isSelected ? width * 0.14 : width * 0.12,
-                                                          decoration: ShapeDecoration(
-                                                            color: circleColor,
-                                                            shape: CircleBorder(),
-                                                          ),
-                                                          child: IconButton(
-                                                            isSelected: isSelected,
-                                                            icon: const Icon(Icons.sentiment_very_dissatisfied),
-                                                            iconSize: isSelected ? width * 0.1 : width * 0.08,
-                                                            color: iconColor,
-                                                            onPressed: () {
-                                                              setState(() {
-                                                                isSelected = true;
-                                                                isSelected2 = false;
-                                                                isSelected3 = false;
-                                                                selectedEmoji = 'Low';
-                                                                iconColor = Colors.white;
-                                                                iconColor2 = Colors.grey.shade800;
-                                                                iconColor3 = Colors.grey.shade800;
-                                                                circleColor = Colors.deepPurple;
-                                                                circleColor2 = Colors.white60;
-                                                                circleColor3 = Colors.white60;
-                                                              });
-                                                            },
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          'Low',
-                                                          style: TextStyle(
-                                                            fontSize: fontSize * 1.2,
-                                                            fontFamily: 'Quicksand',
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                    SizedBox(width: width * 0.1),
-                                                    Column(
-                                                      children: [
-                                                        AnimatedContainer(
-                                                          duration: Duration(milliseconds: 300),
-                                                          width: isSelected2 ? width * 0.14 : width * 0.12,
-                                                          height: isSelected2 ? width * 0.14 : width * 0.12,
-                                                          decoration: ShapeDecoration(
-                                                            color: circleColor2,
-                                                            shape: CircleBorder(),
-                                                          ),
-                                                          child: IconButton(
-                                                            isSelected: isSelected2,
-                                                            icon: Icon(Icons.sentiment_neutral),
-                                                            iconSize: isSelected2 ? width * 0.1 : width * 0.08,
-                                                            color: iconColor2,
-                                                            splashColor: Colors.grey,
-                                                            onPressed: () {
-                                                              setState(() {
-                                                                isSelected = false;
-                                                                isSelected2 = true;
-                                                                isSelected3 = false;
-                                                                selectedEmoji = 'OK';
-                                                                iconColor = Colors.grey.shade800;
-                                                                iconColor2 = Colors.white;
-                                                                iconColor3 = Colors.grey.shade800;
-                                                                circleColor = Colors.white60;
-                                                                circleColor2 = Colors.deepPurple;
-                                                                circleColor3 = Colors.white60;
-                                                              });
-                                                            },
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          'OK',
-                                                          style: TextStyle(
-                                                            fontSize: fontSize * 1.2,
-                                                            fontFamily: 'Quicksand',
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                    SizedBox(width: width * 0.1),
-                                                    Column(
-                                                      children: [
-                                                        AnimatedContainer(
-                                                          duration: Duration(milliseconds: 300),
-                                                          width: isSelected3 ? width * 0.14 : width * 0.12,
-                                                          height: isSelected3 ? width * 0.14 : width * 0.12,
-                                                          decoration: ShapeDecoration(
-                                                            color: circleColor3,
-                                                            shape: CircleBorder(),
-                                                          ),
-                                                          child: IconButton(
-                                                            isSelected: isSelected3,
-                                                            icon: Icon(Icons.sentiment_very_satisfied),
-                                                            iconSize: isSelected3 ? width * 0.1 : width * 0.08,
-                                                            color: iconColor3,
-                                                            onPressed: () {
-                                                              setState(() {
-                                                                isSelected = false;
-                                                                isSelected2 = false;
-                                                                isSelected3 = true;
-                                                                selectedEmoji = 'High';
-                                                                iconColor = Colors.grey.shade800;
-                                                                iconColor2 = Colors.grey.shade800;
-                                                                iconColor3 = Colors.white;
-                                                                circleColor = Colors.white60;
-                                                                circleColor2 = Colors.white60;
-                                                                circleColor3 = Colors.deepPurple;
-                                                              });
-                                                            },
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          'High',
-                                                          style: TextStyle(
-                                                            fontSize: fontSize * 1.2,
-                                                            fontFamily: 'Quicksand',
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
-                                                )
-                                              ],
-                                            )
-                                        ),
-                                      ],
-                                    )
+                                        elevation: 2.0,
+                                      )
+                                  )
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: height * 0.02, left: width * 0.02),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.fade,
+                                        child: TSlider(),
+                                      ),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.info,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                                Container(
-                                    margin: EdgeInsets.only(top: height*0.025),
-                                    child: ElevatedButton (
-                                        onPressed: () async {
-                                          if (isSelected==true || isSelected2==true || isSelected3==true) {
-                                            await FirebaseFirestore.instance
-                                                .collection('users')
-                                                .doc(user.uid.toString())
-                                                .set({formatTimestamp(Timestamp.now()).toString(): selectedEmoji},
-                                                SetOptions(merge: true)
-                                            );
-                                            isSubmitted = true;
-                                          } else {
-                                            popup();
-                                          }
-                                        },
-                                        child: Text(
-                                            'Submit',
-                                            style: TextStyle(
-                                              fontFamily: "Quicksand",
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 0.5,
-                                              color: Color(0xFF49688D),
-                                              fontSize: fontSize * 1.4,
-                                            )
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          fixedSize: Size(0.28 * width, 0.04 * height),
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(100)
-                                          ),
-                                          elevation: 2.0,
-                                        )
-                                    )
-                                ),
-                              ],
-                            )
-                        ),// Empty container to occupy the space
-                      ),
-                      Container(
-                          margin: EdgeInsets.only(top: height*0.05),
-                          child: ElevatedButton (
-                              onPressed: () async {
-                                await pickFile(fontSize);
-                              },
+                              ),
+                            ],
+                          ),
+                          Container(
+                              margin: EdgeInsets.only(top: (0.03*height)),
                               child: Text(
-                                  'Choose File',
+                                  'Result: $result',
                                   style: TextStyle(
                                     fontFamily: "Quicksand",
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.5,
-                                    color: Colors.white,
+                                    color: Colors.black,
                                     fontSize: fontSize * 1.6,
-                                  )
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(0.45 * width, 0.06 * height),
-                                backgroundColor: Color(0xFF49688D),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(100)
-                                ),
-                                elevation: 2.0,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.clip
                               )
-                          )
-                      ),
-                      Container(
-                          margin: EdgeInsets.only(top: (0.05*height)),
-                          child: Text(
-                              'Result: $result',
-                              style: TextStyle(
-                                fontFamily: "Quicksand",
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                                color: Colors.black,
-                                fontSize: fontSize * 1.6,
-                              ),
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.clip
-                          )
-                      )
-                    ]
+                          ),
+                          Container(
+                              margin: EdgeInsets.only(top: height*0.03),
+                              child: Container(
+                                  margin: EdgeInsets.only(left: width*0.1, right: width*0.1),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      margin: EdgeInsets.only(right: width*0.02),
+                                      child: Icon(
+                                        Icons.notification_important_rounded,
+                                        color: Colors.black,
+                                        size: width*0.05
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Text(
+                                          'Please note that TikTok may take 4 days to generate the data. You will be notified to check back within four-day period.',
+                                          overflow: TextOverflow.clip
+                                      )
+                                    )
+                                  ],
+                                )
+                              )
+                          ),
+                        ]
+                    )
                 )
             )
         )

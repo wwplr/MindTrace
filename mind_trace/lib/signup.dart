@@ -270,7 +270,10 @@ class _SignUpState extends State<SignUp> {
         child: Scaffold(
             floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
             floatingActionButton: IconButton(
-              icon: Icon(Icons.arrow_back, color: Color(0xFF2A364E)),
+              icon: Icon(
+                  Icons.arrow_back,
+                  color: Color(0xFF2A364E)
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             backgroundColor: Colors.white,
