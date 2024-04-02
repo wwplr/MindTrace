@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mind_trace/stacked_bar_chart.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -8,10 +10,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final user = FirebaseAuth.instance.currentUser!;
   int touchedIndex = -1;
   final Color barBackgroundColor = Colors.transparent;
   final Color barColor = Colors.white;
   final Color touchedBarColor = Colors.blue;
+  String mood = '';
+  Map<int, List<int>> moodData = {};
 
   @override
   void initState() {
@@ -22,257 +27,217 @@ class _HomeState extends State<Home> {
     ]);
   }
 
+  Future<Map<int, List<int>>> fetchData() async {
+    try {
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid.toString())
+          .get();
+
+      if (documentSnapshot.exists) {
+        List<int> currentMoodSet = [];
+        int setIndex = 0;
+
+        // Assuming mood data is stored directly under the user document
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+
+        // Sort the data by keys (timestamps)
+        List<String> sortedKeys = data.keys.toList()..sort();
+
+        sortedKeys.forEach((key) {
+          var value = data[key]; // Mood data for the current timestamp
+          print('Timestamp: $key, Mood: $value');
+
+          if (value == 'Start') {
+            currentMoodSet = [];
+          } else if (value == 'Finish') {
+            moodData[setIndex++] = currentMoodSet;
+          } else {
+            currentMoodSet.add(getMoodValue(value));
+          }
+        });
+
+        print('Fetched data: $moodData');
+        return moodData;
+      } else {
+        print('User document does not exist.');
+        return {};
+      }
+    } catch (error) {
+      print('Error fetching data: $error');
+      return {};
+    }
+  }
+
+  int getMoodValue(String mood) {
+    switch (mood) {
+      case 'Low':
+        return 1;
+      case 'OK':
+        return 2;
+      case 'High':
+        return 3;
+      default:
+        return 0; // Handle unknown mood values
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.03;
+
     return PopScope(
-        canPop: false,
-        child: Scaffold(
-            body: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      AspectRatio(
-                        aspectRatio: 1,
-                        child: Stack(
-                          children: <Widget>[
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  'Mood Progression',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: fontSize*2,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: "Quicksand"
-                                  ),
-                                ),
-                                Container (
-                                  margin: EdgeInsets.only(top: 0.02*height),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      buildLegend(
-                                          text: 'High',
-                                          color: Colors.green,
-                                          space: 0.01*width,
-                                          fontSize: fontSize*1.3,
-                                          width: 0.015*width,
-                                          height: 0.015*width
-                                      ),
-                                      SizedBox(width: 0.05*width),
-                                      buildLegend(
-                                          text: 'OK',
-                                          color: Colors.yellow,
-                                          space: 0.01*width,
-                                          fontSize: fontSize*1.3,
-                                          width: 0.015*width,
-                                          height: 0.015*width
-                                      ),
-                                      SizedBox(width: 0.05*width),
-                                      buildLegend(
-                                          text: 'Low',
-                                          color: Colors.red,
-                                          space: 0.01*width,
-                                          fontSize: fontSize*1.3,
-                                          width: 0.015*width,
-                                          height: 0.015*width
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                    child: Container (
-                                      margin: EdgeInsets.only(top: 0.05*height),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                                        child: BarChart(
-                                          mainBarData(height, width, fontSize),
-                                        ),
-                                      ),
-                                    )
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ]
-                )
-            )
-        )
-    );
-  }
-
-  static const mainItems = <int, List<double>>{
-    0: [3, 2, 3, 3, 2, 1],
-    1: [2, 1, 2, 3],
-    2: [2, 2, 3, 2],
-    3: [2, 2, 3, 2, 2, 3, 2],
-    4: [3, 2, 3, 3, 2],
-    5: [3, 1, 2, 2],
-    6: [2, 2, 3],
-  };
-
-  Color getMoodColor(double value) {
-    if (value == 1) {
-      return Colors.red; // Low
-    } else if (value == 2) {
-      return Colors.yellow; // OK
-    } else if (value == 3) {
-      return Colors.green; // High
-    } else {
-      return Colors.white; // Default or undefined
-    }
-  }
-
-  BarChartGroupData makeGroupData(
-      int x,
-      List<double> moodValues,
-      {
-        bool isTouched = false,
-        List<int> showTooltips = const [],
-      }) {
-    return BarChartGroupData(
-      x: x,
-      barRods: [
-        BarChartRodData(
-          toY: isTouched ? moodValues.length.toDouble() + 1 : moodValues.length.toDouble(),
-          width: 22,
-          rodStackItems: rodStackItemsList(moodValues, 22),
-          borderSide: isTouched
-              ? BorderSide(color: touchedBarColor)
-              : const BorderSide(color: Colors.white, width: 0),
-        )
-      ],
-      showingTooltipIndicators: showTooltips,
-    );
-  }
-
-  List<BarChartRodStackItem> rodStackItemsList(List<double> moodValues, double width) {
-    double currentHeight = 0;
-
-    return moodValues.map((value) {
-      final rodStackItem = BarChartRodStackItem(
-        currentHeight,
-        currentHeight + 1,
-        getMoodColor(value),
-        BorderSide(
-          color: Colors.white,
-          width: 1.0,
-        ),
-      );
-      currentHeight += 1;
-      return rodStackItem;
-    }).toList();
-  }
-
-  BarChartData mainBarData(double height, double width, double fontSize) {
-    return BarChartData(
-      barTouchData: BarTouchData(
-        touchTooltipData: BarTouchTooltipData(
-          tooltipBgColor: Colors.blueGrey,
-          tooltipHorizontalAlignment: FLHorizontalAlignment.center,
-          tooltipMargin: 5,
-          getTooltipItem: (group, groupIndex, rod, rodIndex) {
-            return BarTooltipItem(
-              'Categories',
-              TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: fontSize * 1.1,
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                //margin: EdgeInsets.only(top: height*0.1),
+                child: Text(
+                  'Mood Progression',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: fontSize * 2,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Quicksand",
+                  ),
+                ),
               ),
-            );
-          },
-        ),
-        touchCallback: (FlTouchEvent event, barTouchResponse) {
-          setState(() {
-            if (!event.isInterestedForInteractions ||
-                barTouchResponse == null ||
-                barTouchResponse.spot == null) {
-              touchedIndex = -1;
-              return;
-            }
-            touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
-          });
-        },
-      ),
-      titlesData: FlTitlesData(
-        show: true,
-        rightTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        topTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            getTitlesWidget: getTitles,
-            reservedSize: 38,
+              Container(
+                margin: EdgeInsets.only(top: height*0.02, bottom: height*0.02),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    buildLegend(
+                      text: 'High',
+                      color: Colors.green,
+                      space: 0.01 * width,
+                      fontSize: fontSize * 1.3,
+                      width: 0.015 * width,
+                      height: 0.015 * width,
+                    ),
+                    SizedBox(width: 0.05 * width),
+                    buildLegend(
+                      text: 'OK',
+                      color: Colors.yellow,
+                      space: 0.01 * width,
+                      fontSize: fontSize * 1.3,
+                      width: 0.015 * width,
+                      height: 0.015 * width,
+                    ),
+                    SizedBox(width: 0.05 * width),
+                    buildLegend(
+                      text: 'Low',
+                      color: Colors.red,
+                      space: 0.01 * width,
+                      fontSize: fontSize * 1.3,
+                      width: 0.015 * width,
+                      height: 0.015 * width,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                  margin: EdgeInsets.only(bottom: height*0.02),
+                  alignment: Alignment.center,
+                  child: ElevatedButton(
+                      onPressed: () async {
+                        Map<int, List<int>> data = await fetchData();
+                        setState(() {
+                          moodData = data;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: Size((0.25*width), (0.02*height)),
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                        elevation: 2.0,
+                      ),
+                      child: Text(
+                          'Generate',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Color(0xFF2A364E),
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.w400
+                          )
+                      )
+                  )
+              ),
+              SizedBox(
+                height: height*0.3,
+                width: width*0.9,
+                child: StackedBarChart(
+                    data: moodData,
+                    colors: [
+                      Colors.red,
+                      Colors.yellow,
+                      Colors.green,
+                    ],
+                    barWidth: width*0.06,
+                    maxHeight: height*0.3,
+                    maxWidth: width*0.9,
+                    barSpacing: width*0.05,
+                    borderRadius: 20,
+                    borderColor: Colors.white,
+                    borderWidth: width*0.0025,
+                    onTap: (m) {
+                      setState(() {
+                        mood = m;
+                      });
+                    }
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: height * 0.02),
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    width: width * 0.8,
+                    height: height * 0.15,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFFF8EA),
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: width * 0.05, top: height * 0.01),
+                            child: Text(
+                              'Mood: $mood',
+                              style: TextStyle(
+                                fontSize: fontSize * 1.4,
+                                fontFamily: 'Quicksand',
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: width * 0.05, top: height * 0.01),
+                            child: Text(
+                              'Categories: ',
+                              style: TextStyle(
+                                fontSize: fontSize * 1.4,
+                                fontFamily: 'Quicksand',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        leftTitles: const AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: false,
-          ),
-        ),
       ),
-      borderData: FlBorderData(
-        show: false,
-      ),
-      barGroups: mainItems.entries.map(
-            (e) => makeGroupData(
-          e.key,
-          e.value,
-        ),
-      ).toList(),
-      gridData: const FlGridData(show: false),
-    );
-  }
-
-  Widget getTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
-      color: Colors.black,
-      fontWeight: FontWeight.w600,
-      fontFamily: "Quicksand",
-      fontSize: 14,
-    );
-    Widget text;
-    switch (value.toInt()) {
-      case 0:
-        text = const Text('Time', style: style);
-        break;
-      case 1:
-        text = const Text('Time', style: style);
-        break;
-      case 2:
-        text = const Text('Time', style: style);
-        break;
-      case 3:
-        text = const Text('Time', style: style);
-        break;
-      case 4:
-        text = const Text('Time', style: style);
-        break;
-      case 5:
-        text = const Text('Time', style: style);
-        break;
-      case 6:
-        text = const Text('Time', style: style);
-        break;
-      default:
-        text = const Text('', style: style);
-        break;
-    }
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      space: 16,
-      child: text,
     );
   }
 
@@ -282,8 +247,7 @@ class _HomeState extends State<Home> {
     required double space,
     required double fontSize,
     required double width,
-    required double height
-
+    required double height,
   }) =>
       Row(
         mainAxisSize: MainAxisSize.min,

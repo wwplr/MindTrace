@@ -257,7 +257,13 @@ class _AddState extends State<Add> {
           ),
           Container(
               child: ElevatedButton (
-                  onPressed: () {
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid.toString())
+                        .set({formatTimestamp(Timestamp.now()).toString(): 'Finish'},
+                        SetOptions(merge: true)
+                    );
                     Provider.of<TimerProvider>(context, listen: false).stopTimer();
                     Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
                     Provider.of<TimerProvider>(context, listen: false).setStart(true);
@@ -529,7 +535,13 @@ class _AddState extends State<Add> {
           Container(
             margin: EdgeInsets.only(top: height*0.025),
               child: ElevatedButton (
-                  onPressed: ()  {
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid.toString())
+                        .set({formatTimestamp(Timestamp.now()).toString(): 'Start'},
+                        SetOptions(merge: true)
+                    );
                     Provider.of<TimerProvider>(context, listen: false).setStart(false);
                   },
                   child: Text(
