@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mind_trace/stacked_bar_chart.dart';
 
+import 'main.dart';
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -11,12 +13,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final user = FirebaseAuth.instance.currentUser!;
-  int touchedIndex = -1;
-  final Color barBackgroundColor = Colors.transparent;
-  final Color barColor = Colors.white;
-  final Color touchedBarColor = Colors.blue;
   String mood = '';
   Map<int, List<int>> moodData = {};
+  String categories = '';
 
   @override
   void initState() {
@@ -27,7 +26,7 @@ class _HomeState extends State<Home> {
     ]);
   }
 
-  Future<Map<int, List<int>>> fetchData() async {
+  Future<void> fetchData() async {
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -37,6 +36,7 @@ class _HomeState extends State<Home> {
       if (documentSnapshot.exists) {
         List<int> currentMoodSet = [];
         int setIndex = 0;
+        Map<int, List<int>> newMoodData = {}; // Updated here
 
         // Assuming mood data is stored directly under the user document
         Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
@@ -51,21 +51,22 @@ class _HomeState extends State<Home> {
           if (value == 'Start') {
             currentMoodSet = [];
           } else if (value == 'Finish') {
-            moodData[setIndex++] = currentMoodSet;
+            newMoodData[setIndex++] = currentMoodSet;
           } else {
             currentMoodSet.add(getMoodValue(value));
           }
         });
 
-        print('Fetched data: $moodData');
-        return moodData;
+        print('Fetched data: $newMoodData');
+
+        setState(() {
+          moodData = newMoodData; // Update moodData here
+        });
       } else {
         print('User document does not exist.');
-        return {};
       }
     } catch (error) {
       print('Error fetching data: $error');
-      return {};
     }
   }
 
@@ -147,10 +148,7 @@ class _HomeState extends State<Home> {
                   alignment: Alignment.center,
                   child: ElevatedButton(
                       onPressed: () async {
-                        Map<int, List<int>> data = await fetchData();
-                        setState(() {
-                          moodData = data;
-                        });
+                        await fetchData();
                       },
                       style: ElevatedButton.styleFrom(
                         fixedSize: Size((0.25*width), (0.02*height)),
@@ -171,10 +169,10 @@ class _HomeState extends State<Home> {
                       )
                   )
               ),
-              SizedBox(
-                height: height*0.3,
-                width: width*0.9,
+              Container(
                 child: StackedBarChart(
+                    height: height,
+                    width: width,
                     data: moodData,
                     colors: [
                       Colors.red,
@@ -197,8 +195,7 @@ class _HomeState extends State<Home> {
               ),
               Container(
                 margin: EdgeInsets.only(top: height * 0.02),
-                child: SingleChildScrollView(
-                  child: SizedBox(
+                child: SizedBox(
                     width: width * 0.8,
                     height: height * 0.15,
                     child: DecoratedBox(
@@ -222,7 +219,7 @@ class _HomeState extends State<Home> {
                           Container(
                             margin: EdgeInsets.only(left: width * 0.05, top: height * 0.01),
                             child: Text(
-                              'Categories: ',
+                              'Categories: $categories',
                               style: TextStyle(
                                 fontSize: fontSize * 1.4,
                                 fontFamily: 'Quicksand',
@@ -234,7 +231,6 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                 ),
-              ),
             ],
           ),
       ),

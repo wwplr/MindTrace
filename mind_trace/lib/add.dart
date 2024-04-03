@@ -13,9 +13,11 @@ import 'package:provider/provider.dart';
 class TimerProvider extends ChangeNotifier {
   late Timer _timer;
   bool _isSubmitted = false;
-  bool get isSubmitted => _isSubmitted;
   bool _start = true;
+  bool _continued = false;
+  bool get isSubmitted => _isSubmitted;
   bool get start => _start;
+  bool get continued => _continued;
   Timer get timer => _timer;
 
   void setStart(bool value) {
@@ -23,20 +25,15 @@ class TimerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-  void setSubmit(bool value) {
-    _isSubmitted = value;
+  void setContinue(bool value) {
+    _continued = value;
     notifyListeners();
   }
 
-  void startTimer() {
-    _isSubmitted = true;
+  void setSubmit(bool value) {
+    _isSubmitted = value;
+    _continued = false;
     notifyListeners();
-
-    _timer = Timer(Duration(seconds: 5), () {
-      _isSubmitted = false;
-      notifyListeners();
-    });
   }
 
   void stopTimer() {
@@ -69,7 +66,8 @@ class _AddState extends State<Add> {
   bool isSelected = false;
   bool isSelected2 = false;
   bool isSelected3 = false;
-  bool start = true;
+  bool yesClicked = false;
+  late Timestamp startTimestamp;
 
 
   @override
@@ -88,7 +86,6 @@ class _AddState extends State<Add> {
     if (result != null) {
       File file = File(result.files.single.path!);
 
-      // Now you have the file, you can send it to Python
       await sendToPython(file, fontSize);
     } else {
       print("User canceled file picking");
@@ -236,13 +233,32 @@ class _AddState extends State<Add> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            'Come back in 20 minutes.',
-            style: TextStyle(
-              fontFamily: 'Quicksand',
-              fontSize: fontSize * 1.5,
-              fontWeight: FontWeight.w500,
-            ),
+          Container(
+              child: ElevatedButton (
+                  onPressed: () {
+                    Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
+                    Provider.of<TimerProvider>(context, listen: false).setStart(false);
+                    Provider.of<TimerProvider>(context, listen: false).setContinue(true);
+                  },
+                  child: Text(
+                      'Continue',
+                      style: TextStyle(
+                        fontFamily: "Quicksand",
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        color: Color(0xFF49688D),
+                        fontSize: fontSize * 1.4,
+                      )
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(0.3 * width, 0.045 * height),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100)
+                    ),
+                    elevation: 2.0,
+                  )
+              )
           ),
           Container(
             margin: EdgeInsets.only(top: height*0.025, bottom:height*0.025),
@@ -264,7 +280,6 @@ class _AddState extends State<Add> {
                         .set({formatTimestamp(Timestamp.now()).toString(): 'Finish'},
                         SetOptions(merge: true)
                     );
-                    Provider.of<TimerProvider>(context, listen: false).stopTimer();
                     Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
                     Provider.of<TimerProvider>(context, listen: false).setStart(true);
                   },
@@ -464,7 +479,7 @@ class _AddState extends State<Add> {
                           .set({formatTimestamp(Timestamp.now()).toString(): selectedEmoji},
                           SetOptions(merge: true)
                       );
-                      Provider.of<TimerProvider>(context, listen: false).startTimer();
+                      Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
                     } else {
                       popup();
                     }
@@ -492,9 +507,25 @@ class _AddState extends State<Add> {
           Container(
             margin: EdgeInsets.only(top: height*0.005),
             child: GestureDetector(
-              onTap: () {
-                Provider.of<TimerProvider>(context, listen: false).setStart(true);
-              },
+                onTap: () {
+                  if (Provider.of<TimerProvider>(context, listen: false).continued == true){
+                    Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
+                  } else {
+                    if (startTimestamp != null) {
+                      FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid.toString())
+                          .update({formatTimestamp(startTimestamp).toString(): FieldValue.delete()})
+                          .then((_) {
+                        print("Entry deleted successfully.");
+                      })
+                          .catchError((error) {
+                        print("Failed to delete entry: $error");
+                      });
+                    }
+                    Provider.of<TimerProvider>(context, listen: false).setStart(true);
+                  }
+                },
               child: Text(
                 'Cancel',
                 style: TextStyle(
@@ -521,6 +552,7 @@ class _AddState extends State<Add> {
     isSelected2 = false;
     isSelected3 = false;
     Provider.of<TimerProvider>(context).isSubmitted == false;
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -536,10 +568,11 @@ class _AddState extends State<Add> {
             margin: EdgeInsets.only(top: height*0.025),
               child: ElevatedButton (
                   onPressed: () async {
+                    startTimestamp = Timestamp.now();
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid.toString())
-                        .set({formatTimestamp(Timestamp.now()).toString(): 'Start'},
+                        .set({formatTimestamp(startTimestamp).toString(): 'Start'},
                         SetOptions(merge: true)
                     );
                     Provider.of<TimerProvider>(context, listen: false).setStart(false);

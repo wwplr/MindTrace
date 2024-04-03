@@ -274,6 +274,7 @@ class _LoginState extends State<Login> {
                                                     controller: _passwordController,
                                                     obscureText: _securedPassword,
                                                     enableInteractiveSelection: false,
+                                                    autocorrect: false,
                                                     style: TextStyle(
                                                         fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
@@ -284,11 +285,6 @@ class _LoginState extends State<Login> {
                                                     maxLines: 1,
                                                     keyboardType: TextInputType.text,
                                                     textInputAction: TextInputAction.done,
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter.allow(
-                                                          RegExp('[A-Za-z0-9]')
-                                                      )
-                                                    ],
                                                     cursorColor: Color(0xFF2A364E),
                                                     decoration: InputDecoration(
                                                       hintText: 'Password',
