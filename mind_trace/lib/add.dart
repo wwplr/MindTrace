@@ -708,31 +708,6 @@ class _AddState extends State<Add> {
                                   overflow: TextOverflow.clip
                               )
                           ),
-                          Container(
-                              margin: EdgeInsets.only(top: height*0.03),
-                              child: Container(
-                                  margin: EdgeInsets.only(left: width*0.1, right: width*0.1),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      margin: EdgeInsets.only(right: width*0.02),
-                                      child: Icon(
-                                        Icons.notification_important_rounded,
-                                        color: Colors.black,
-                                        size: width*0.05
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Text(
-                                          'Please note that TikTok may take 4 days to generate the data. You will be notified to check back within four-day period.',
-                                          overflow: TextOverflow.clip
-                                      )
-                                    )
-                                  ],
-                                )
-                              )
-                          ),
                         ]
                     )
                 )
