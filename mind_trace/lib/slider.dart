@@ -34,15 +34,21 @@ class _TSliderState extends State<TSlider> {
     } else if (index == 3) {
       description = "Click on 'Download your data'.";
     } else if (index == 4) {
-      description = "Select the 'TXT' file format and click 'Request data'.";
+      description = "Make sure to select 'All data' and 'TXT' file format. Then click 'Request data'.";
     } else if (index == 5) {
-      description = "Go to 'Download data' to verify processing. It may take up to four days for file generation. You'll receive a notification from MindTrace to check back.";
+      description = "File generation takes a few minutes. Once complete, click 'Download'. You'll receive a verification code from TikTok to verify your identity.";
     } else if (index == 6) {
-      description = "Once downloaded, go to your 'Files' app on your phone and locate the zip file. Click on the zip file once to uncompress it.";
+      description = "You will be directed to a web browser. Click 'Download'.";
     } else if (index == 7) {
-      description = "Open MindTrace app and click on the 'Choose File' button. Open the uncompressed folder and navigate to 'Activity'.";
+      description = "Go to the menu on the top left corner. Click on 'Downloads'.";
     } else if (index == 8) {
-      description = "Select 'Browsing_History'.";
+      description = "Click on the magnifying glass.";
+    } else if (index == 9) {
+      description = "You will be directed to the Files app. Tap the zip file once to uncompress.";
+    } else if (index == 10) {
+      description = "Open MindTrace app and click on the 'Choose File' button. Open the uncompressed folder and navigate to 'Activity'.";
+    } else if (index == 11) {
+      description = "Select 'Browsing History'.";
     }
   }
 
@@ -142,7 +148,10 @@ final List<String> imgList = [
   'assets/images/6.png',
   'assets/images/7.png',
   'assets/images/8.png',
-  'assets/images/9.png'
+  'assets/images/9.png',
+  'assets/images/10.png',
+  'assets/images/11.png',
+  'assets/images/12.png'
 ];
 
 final List<Widget> imageSliders = imgList.map((item) => Container(

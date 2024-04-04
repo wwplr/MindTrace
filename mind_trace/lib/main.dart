@@ -9,7 +9,7 @@ import 'notification.dart';
 
 final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
-DateTime scheduledDateTime = DateTime(now.year, now.month, now.day, 19, 04, 35);
+DateTime scheduledDateTime = DateTime(now.year, now.month, now.day, 14, 0);
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
