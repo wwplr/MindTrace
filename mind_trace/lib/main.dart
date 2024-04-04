@@ -9,7 +9,8 @@ import 'notification.dart';
 
 final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
-DateTime scheduledDateTime = DateTime(now.year, now.month, now.day, 14, 0);
+DateTime afternoonScheduledDateTime = DateTime(now.year, now.month, now.day, 14, 00);
+DateTime eveningScheduledDateTime = DateTime(now.year, now.month, now.day, 22, 00);
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -17,23 +18,26 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await flutterNotification.initialiseNotifications();
 
-  if (scheduledDateTime.isAfter(now)) {
-    await flutterNotification.scheduleNotification(
-      id: 1,
-      title: 'MindTrace',
-      body: "Are you on TikTok? Don't forget to log your mood.",
-      scheduledNotificationDateTime: scheduledDateTime,
-    );
-  } else {
-    scheduledDateTime = scheduledDateTime.add(Duration(days: 1)); // Increment the date by one day
-    scheduledDateTime = DateTime(scheduledDateTime.year, scheduledDateTime.month, scheduledDateTime.day, 18, 51); // Set the time to 6:51 PM
-    await flutterNotification.scheduleNotification(
-      id: 1,
-      title: 'MindTrace',
-      body: "Are you on TikTok? Don't forget to log your mood.",
-      scheduledNotificationDateTime: scheduledDateTime,
-    );
+  if (afternoonScheduledDateTime.isBefore(now)) {
+    afternoonScheduledDateTime = afternoonScheduledDateTime.add(Duration(days: 1));
   }
+  await flutterNotification.scheduleNotification(
+    id: 1,
+    title: 'MindTrace',
+    body: "Are you on TikTok? Don't for get to log your mood.",
+    scheduledNotificationDateTime: afternoonScheduledDateTime,
+  );
+
+  // Evening Notification
+  if (eveningScheduledDateTime.isBefore(now)) {
+    eveningScheduledDateTime = eveningScheduledDateTime.add(Duration(days: 1));
+  }
+  await flutterNotification.scheduleNotification(
+    id: 2,
+    title: 'MindTrace',
+    body: "Are you on TikTok? Don't for get to log your mood.",
+    scheduledNotificationDateTime: eveningScheduledDateTime,
+  );
 
   runApp(
     ChangeNotifierProvider<TimerProvider>(

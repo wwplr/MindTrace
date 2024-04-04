@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Colors.white,
             bottomNavigationBar: CurvedNavigationBar(
               buttonBackgroundColor: Color(0xFFC6F2FF),
-              iconPadding: 20,
+              iconPadding: width*0.047,
               backgroundColor: Colors.white,
               color: Color(0xFFC6F2FF),
               animationDuration: Duration(milliseconds: 400),

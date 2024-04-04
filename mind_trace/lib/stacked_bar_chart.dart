@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class StackedBarChart extends StatefulWidget {
   final Map<int, List<int>> data;
+  final Map<int, List<String>> timestamps;
+  Map<int, List<String>> categories;
   final List<Color> colors;
   final double barWidth;
   final double maxHeight;
@@ -10,12 +12,14 @@ class StackedBarChart extends StatefulWidget {
   final double borderRadius;
   final Color borderColor;
   final double borderWidth;
-  final Function(String mood)? onTap;
+  final Function(String mood, String timestamp, String categories)? onTap;
   final double height;
   final double width;
 
   StackedBarChart({
     required this.data,
+    required this.timestamps,
+    required this.categories,
     required this.colors,
     required this.barWidth,
     required this.maxHeight,
@@ -75,7 +79,7 @@ class _StackedBarChartState extends State<StackedBarChart> {
         width: widget.width * 0.9,
       child: GestureDetector(
         onTapDown: (TapDownDetails details) {
-          _handleTap(details, true);
+          handleTap(details, true);
         },
         onTapCancel: () {
           setState(() {
@@ -90,6 +94,8 @@ class _StackedBarChartState extends State<StackedBarChart> {
           child: CustomPaint(
             painter: BarChartPainter(
               data: widget.data,
+              timestamps: widget.timestamps,
+              categories: widget.categories,
               colors: widget.colors,
               barWidth: widget.barWidth,
               barSpacing: widget.barSpacing,
@@ -106,7 +112,7 @@ class _StackedBarChartState extends State<StackedBarChart> {
     );
   }
 
-  void _handleTap(TapDownDetails details, bool isPressed) {
+  void handleTap(TapDownDetails details, bool isPressed) {
     setState(() {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
       final tapPosition = renderBox.globalToLocal(details.globalPosition);
@@ -133,15 +139,17 @@ class _StackedBarChartState extends State<StackedBarChart> {
           _previousInnerBlockIndex = innerBlockIndex;
           if (widget.onTap != null) {
             final moodValue = moodChanges[innerBlockIndex];
-            final mood = _getMood(moodValue);
-            widget.onTap!(mood);
+            final mood = getMood(moodValue);
+            final timestamp = getTimestamp(blockIndex, innerBlockIndex);
+            final category = getCategories(blockIndex, innerBlockIndex);
+            widget.onTap!(mood, timestamp, category);
           }
         }
       }
     });
   }
 
-  String _getMood(int moodValue) {
+  String getMood(int moodValue) {
     switch (moodValue) {
       case 1:
         return 'Low';
@@ -153,10 +161,34 @@ class _StackedBarChartState extends State<StackedBarChart> {
         return 'Undefined';
     }
   }
+
+  String getTimestamp(int blockIndex, int innerBlockIndex) {
+    final moodChanges = widget.data[blockIndex] ?? [];
+    if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
+      final timestampList = widget.timestamps[blockIndex];
+      final timestamp = timestampList?[innerBlockIndex];
+      return timestamp ?? '';
+    }
+    return '';
+  }
+
+  String getCategories(int blockIndex, int innerBlockIndex) {
+    final moodChanges = widget.data[blockIndex] ?? [];
+    if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
+      final categoryList = widget.categories[blockIndex];
+      var categories = categoryList?[innerBlockIndex];
+      categories = categories?.replaceAll('[', '')?.replaceAll(']', '');
+      return categories ?? '';
+    }
+    return '';
+  }
+
 }
 
 class BarChartPainter extends CustomPainter {
   final Map<int, List<int>?> data;
+  final Map<int, List<String>> timestamps;
+  final Map<int, List<String>> categories;
   final List<Color> colors;
   final double barWidth;
   final double barSpacing;
@@ -169,6 +201,8 @@ class BarChartPainter extends CustomPainter {
 
   BarChartPainter({
     required this.data,
+    required this.timestamps,
+    required this.categories,
     required this.colors,
     required this.barWidth,
     required this.barSpacing,

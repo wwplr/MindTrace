@@ -56,6 +56,9 @@ class Add extends StatefulWidget {
 class _AddState extends State<Add> {
   final user = FirebaseAuth.instance.currentUser!;
   String result = '';
+  String cat = '';
+  List<String> resultList = [];
+  Map<int, List<List<String>>> categories = {};
   String selectedEmoji = '';
   Color iconColor = Colors.grey.shade800;
   Color iconColor2 = Colors.grey.shade800;
@@ -68,12 +71,12 @@ class _AddState extends State<Add> {
   bool isSelected3 = false;
   bool yesClicked = false;
   late Timestamp startTimestamp;
-
+  Map<int, List<String>> timestamps = {};
+  bool isDialogOpen = false;
 
   @override
   void initState() {
     super.initState();
-
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -86,14 +89,14 @@ class _AddState extends State<Add> {
     if (result != null) {
       File file = File(result.files.single.path!);
 
-      await sendToPython(file, fontSize);
+      await fetchData(file, fontSize);
+
     } else {
       print("User canceled file picking");
     }
   }
 
-  Future<void> sendToPython(File file, double fontSize) async {
-    String pythonScriptUrl = 'http://16.170.236.95:5000/';
+  Future<void> fetchData(File file, double fontSize) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -101,11 +104,11 @@ class _AddState extends State<Add> {
         return AlertDialog(
             backgroundColor: Colors.white,
             content: Text(
-                "This might take a few minutes. Please don't leave the app.",
+                "This may take a few minutes. Please don't leave the app.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Color(0xFF2A364E),
-                    fontSize: fontSize*1.45,
+                    fontSize: fontSize * 1.45,
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w600
                 )
@@ -113,7 +116,8 @@ class _AddState extends State<Add> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20)
             ),
-            insetPadding: EdgeInsets.only(right: (3*fontSize), left: (3*fontSize)),
+            insetPadding: EdgeInsets.only(
+                right: (3 * fontSize), left: (3 * fontSize)),
             actions: [
               Center(
                   child: CircularProgressIndicator()
@@ -124,9 +128,88 @@ class _AddState extends State<Add> {
     );
 
     try {
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid.toString())
+          .get();
+
+      if (documentSnapshot.exists) {
+        int setIndex = 0;
+        List<String> currentTimestamps = [];
+        List<List<String>> currentCategories = [];
+        Map<int, List<String>> newTimestamps = {};
+        Map<int, List<List<String>>> newCategories = {};
+
+        List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<String, dynamic>).entries.map((entry) => {
+          'timestamp': entry.key,
+          'moods': entry.value as List<dynamic>
+        }).toList();
+
+        List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
+
+        bool loopCompleted = false;
+
+        for (String timestamp in sortedTimestamps) {
+          List<dynamic> moods = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp)['moods'];
+
+          if (moods.contains('Start')) {
+            currentTimestamps = [];
+            currentCategories = [];
+          } else if (moods.contains('Finish')) {
+            newTimestamps[setIndex] = currentTimestamps;
+            newCategories[setIndex] = currentCategories;
+            setIndex++;
+          } else {
+            currentTimestamps.add(timestamp);
+
+            await sendToPython(file, fontSize, timestamp);
+            currentCategories.add(resultList);
+
+            Map<String, dynamic> existingData = documentSnapshot.data() as Map<String, dynamic>;
+            List<dynamic> existingCategories = existingData[timestamp] ?? [];
+            existingCategories.addAll(resultList);
+
+            await FirebaseFirestore.instance.collection('users').doc(user.uid.toString()).update({
+              timestamp: existingCategories,
+            });
+
+            print('Fetched categories: $result');
+            resultList = [];
+
+            // Check if all timestamps and categories have been processed
+            if (sortedTimestamps.length - 2 == currentCategories.length) {
+              loopCompleted = true;
+            }
+          }
+
+          if (loopCompleted) {
+            Navigator.pop(context);
+            setState(() {
+              timestamps = newTimestamps;
+              categories = newCategories;
+              loopCompleted = false;
+            });
+            print('All timestamps: $timestamps');
+            print('All categories: $categories');
+          }
+        };
+      } else {
+        Navigator.pop(context);
+        print('User document does not exist.');
+      }
+    } catch (error) {
+      print('Error fetching data: $error');
+    }
+  }
+
+  Future<void> sendToPython(File file, double fontSize, String timestamp) async {
+    String pythonScriptUrl = 'http://16.170.236.95:5000/';
+
+    try {
       // Create a multipart request
+      print('Timestamp sent: $timestamp');
       var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl))
-        ..fields['timestamp_r'] = '2024-01-23 12:11:49'
+        ..fields['timestamp_r'] = timestamp
         ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
       // Send the request
@@ -137,14 +220,15 @@ class _AddState extends State<Add> {
         String pythonResponse = await response.stream.bytesToString();
         setState(() {
           result = pythonResponse;
+          resultList.add(result);
         });
-        Navigator.pop(context);
       } else {
-        Navigator.pop(context);
-        print('Failed to communicate with Python server. Status code: ${response.statusCode}');
+        print('Failed to communicate with Python server. Status code: ${response
+            .statusCode}');
       }
     } catch (e) {
       print('Error sending file to Python server: $e');
+    } finally {
     }
   }
 
@@ -277,7 +361,9 @@ class _AddState extends State<Add> {
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid.toString())
-                        .set({formatTimestamp(Timestamp.now()).toString(): 'Finish'},
+                        .set({formatTimestamp(Timestamp.now()).toString(): [
+                      'Finish'
+                          ]},
                         SetOptions(merge: true)
                     );
                     Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
@@ -476,7 +562,10 @@ class _AddState extends State<Add> {
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc(user.uid.toString())
-                          .set({formatTimestamp(Timestamp.now()).toString(): selectedEmoji},
+                          .set({formatTimestamp(Timestamp.now()).toString(): [
+                        selectedEmoji,
+                        cat
+                      ]},
                           SetOptions(merge: true)
                       );
                       Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
@@ -572,7 +661,9 @@ class _AddState extends State<Add> {
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid.toString())
-                        .set({formatTimestamp(startTimestamp).toString(): 'Start'},
+                        .set({formatTimestamp(startTimestamp).toString(): [
+                          'Start'
+                    ]},
                         SetOptions(merge: true)
                     );
                     Provider.of<TimerProvider>(context, listen: false).setStart(false);

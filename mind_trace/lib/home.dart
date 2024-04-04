@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:mind_trace/stacked_bar_chart.dart';
-
-import 'main.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -14,8 +13,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final user = FirebaseAuth.instance.currentUser!;
   String mood = '';
-  Map<int, List<int>> moodData = {};
+  String timestamp = '';
   String categories = '';
+  Map<int, List<int>> moodData = {};
+  Map<int, List<String>> timestamps = {};
+  Map<int, List<String>> categoriesList = {};
 
   @override
   void initState() {
@@ -26,6 +28,17 @@ class _HomeState extends State<Home> {
     ]);
   }
 
+  String convertTimestamp(String timestamp) {
+    DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+    DateTime ts = inputFormat.parse(timestamp);
+
+    DateFormat outputFormat = DateFormat('E, d MMM hh:mm:ss a');
+
+    return outputFormat.format(ts);
+  }
+
+
   Future<void> fetchData() async {
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
@@ -35,32 +48,52 @@ class _HomeState extends State<Home> {
 
       if (documentSnapshot.exists) {
         List<int> currentMoodSet = [];
+        List<String> currentTimestamps = [];
+        List<String> currentCategories = [];
         int setIndex = 0;
-        Map<int, List<int>> newMoodData = {}; // Updated here
+        Map<int, List<int>> newMoodData = {};
+        Map<int, List<String>> newTimestamps = {};
+        Map<int, List<String>> newCategories = {};
 
-        // Assuming mood data is stored directly under the user document
-        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+        List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<String, dynamic>).entries.map((entry) => {
+          'timestamp': entry.key,
+          'moods': entry.value[0],
+          'categories': entry.value[1]
+        }).toList();
 
-        // Sort the data by keys (timestamps)
-        List<String> sortedKeys = data.keys.toList()..sort();
+        List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
 
-        sortedKeys.forEach((key) {
-          var value = data[key]; // Mood data for the current timestamp
-          print('Timestamp: $key, Mood: $value');
+        for (String timestamp in sortedTimestamps) {
+          var entry = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp);
 
-          if (value == 'Start') {
+          String mood = entry['moods'];
+          String categories = entry['categories'];
+
+          String ts = convertTimestamp(timestamp);
+
+          if (mood == 'Start') {
             currentMoodSet = [];
-          } else if (value == 'Finish') {
-            newMoodData[setIndex++] = currentMoodSet;
+            currentTimestamps = [];
+            currentCategories = [];
+          } else if (mood == 'Finish') {
+            newMoodData[setIndex] = currentMoodSet;
+            newTimestamps[setIndex] = currentTimestamps;
+            newCategories[setIndex] = currentCategories;
+            setIndex++;
           } else {
-            currentMoodSet.add(getMoodValue(value));
+            currentMoodSet.add(getMoodValue(mood));
+            currentCategories.add('[$categories]');
+            currentTimestamps.add(ts);
           }
-        });
+        }
 
         print('Fetched data: $newMoodData');
+        print('Fetched timestamps: $newTimestamps');
 
         setState(() {
-          moodData = newMoodData; // Update moodData here
+          moodData = newMoodData;
+          timestamps = newTimestamps;
+          categoriesList = newCategories;
         });
       } else {
         print('User document does not exist.');
@@ -174,6 +207,8 @@ class _HomeState extends State<Home> {
                     height: height,
                     width: width,
                     data: moodData,
+                    timestamps: timestamps,
+                    categories: categoriesList,
                     colors: [
                       Colors.red,
                       Colors.yellow,
@@ -186,9 +221,11 @@ class _HomeState extends State<Home> {
                     borderRadius: 20,
                     borderColor: Colors.white,
                     borderWidth: width*0.0025,
-                    onTap: (m) {
+                    onTap: (m, ts, c) {
                       setState(() {
                         mood = m;
+                        timestamp = ts;
+                        categories = c.toString();
                       });
                     }
                 ),
@@ -196,34 +233,81 @@ class _HomeState extends State<Home> {
               Container(
                 margin: EdgeInsets.only(top: height * 0.02),
                 child: SizedBox(
-                    width: width * 0.8,
-                    height: height * 0.15,
+                    width: width * 0.85,
+                    height: height * 0.17,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Color(0xFFFFF8EA),
                         borderRadius: BorderRadius.all(Radius.circular(30)),
                       ),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            margin: EdgeInsets.only(left: width * 0.05, top: height * 0.01),
-                            child: Text(
-                              'Mood: $mood',
-                              style: TextStyle(
-                                fontSize: fontSize * 1.4,
-                                fontFamily: 'Quicksand',
-                              ),
+                            margin: EdgeInsets.only(left: width * 0.04, right: width * 0.04),
+                            child: RichText(
+                                text: TextSpan(
+                                    style: TextStyle(
+                                        fontSize: fontSize * 1.4,
+                                        fontFamily: 'Quicksand',
+                                        color: Colors.black,
+                                        letterSpacing: width*0.0006
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Timestamp:',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600
+                                        ),
+                                      ),
+                                      TextSpan(text: ' $timestamp')
+                                    ]
+                                )
                             ),
                           ),
                           Container(
-                            margin: EdgeInsets.only(left: width * 0.05, top: height * 0.01),
-                            child: Text(
-                              'Categories: $categories',
-                              style: TextStyle(
-                                fontSize: fontSize * 1.4,
-                                fontFamily: 'Quicksand',
-                              ),
+                            margin: EdgeInsets.only(left: width * 0.04, right: width * 0.04, top: height * 0.01),
+                            child: RichText(
+                              text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: fontSize * 1.4,
+                                    fontFamily: 'Quicksand',
+                                    color: Colors.black,
+                                      letterSpacing: width*0.0006
+                                  ),
+                                children: [
+                                  TextSpan(
+                                    text: 'Mood:',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600
+                                    ),
+                                  ),
+                                  TextSpan(text: ' $mood')
+                                ]
+                              )
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: width * 0.04, right: width * 0.04, top: height * 0.01),
+                            child: RichText(
+                                text: TextSpan(
+                                    style: TextStyle(
+                                        fontSize: fontSize * 1.4,
+                                        fontFamily: 'Quicksand',
+                                        color: Colors.black,
+                                        letterSpacing: width*0.0006
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Categories:',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      TextSpan(text: ' $categories')
+                                    ]
+                                )
                             ),
                           ),
                         ],
