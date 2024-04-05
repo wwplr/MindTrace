@@ -15,9 +15,9 @@ class _HomeState extends State<Home> {
   String mood = '';
   String timestamp = '';
   String categories = '';
-  Map<int, List<int>> moodData = {};
-  Map<int, List<String>> timestamps = {};
-  Map<int, List<String>> categoriesList = {};
+  Map<int, List<int>> moodList = {};
+  Map<int, List<String>> timestampList = {};
+  Map<int, List<String>> categoryList = {};
 
   @override
   void initState() {
@@ -47,11 +47,11 @@ class _HomeState extends State<Home> {
           .get();
 
       if (documentSnapshot.exists) {
-        List<int> currentMoodSet = [];
+        List<int> currentMoods = [];
         List<String> currentTimestamps = [];
         List<String> currentCategories = [];
         int setIndex = 0;
-        Map<int, List<int>> newMoodData = {};
+        Map<int, List<int>> newMoods = {};
         Map<int, List<String>> newTimestamps = {};
         Map<int, List<String>> newCategories = {};
 
@@ -72,28 +72,28 @@ class _HomeState extends State<Home> {
           String ts = convertTimestamp(timestamp);
 
           if (mood == 'Start') {
-            currentMoodSet = [];
+            currentMoods = [];
             currentTimestamps = [];
             currentCategories = [];
           } else if (mood == 'Finish') {
-            newMoodData[setIndex] = currentMoodSet;
+            newMoods[setIndex] = currentMoods;
             newTimestamps[setIndex] = currentTimestamps;
             newCategories[setIndex] = currentCategories;
             setIndex++;
           } else {
-            currentMoodSet.add(getMoodValue(mood));
+            currentMoods.add(getMoodValue(mood));
             currentCategories.add('[$categories]');
             currentTimestamps.add(ts);
           }
         }
 
-        print('Fetched data: $newMoodData');
+        print('Fetched data: $newMoods');
         print('Fetched timestamps: $newTimestamps');
 
         setState(() {
-          moodData = newMoodData;
-          timestamps = newTimestamps;
-          categoriesList = newCategories;
+          moodList = newMoods;
+          timestampList = newTimestamps;
+          categoryList = newCategories;
         });
       } else {
         print('User document does not exist.');
@@ -206,9 +206,9 @@ class _HomeState extends State<Home> {
                 child: StackedBarChart(
                     height: height,
                     width: width,
-                    data: moodData,
-                    timestamps: timestamps,
-                    categories: categoriesList,
+                    data: moodList,
+                    timestamps: timestampList,
+                    categories: categoryList,
                     colors: [
                       Colors.red,
                       Colors.yellow,

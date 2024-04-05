@@ -56,9 +56,8 @@ class Add extends StatefulWidget {
 class _AddState extends State<Add> {
   final user = FirebaseAuth.instance.currentUser!;
   String result = '';
-  String cat = '';
+  String categories = '';
   List<String> resultList = [];
-  Map<int, List<List<String>>> categories = {};
   String selectedEmoji = '';
   Color iconColor = Colors.grey.shade800;
   Color iconColor2 = Colors.grey.shade800;
@@ -71,7 +70,9 @@ class _AddState extends State<Add> {
   bool isSelected3 = false;
   bool yesClicked = false;
   late Timestamp startTimestamp;
-  Map<int, List<String>> timestamps = {};
+  Map<int, List<String>> timestampList = {};
+  Map<int, List<String>> moodList = {};
+  Map<int, List<List<String>>> categoryList = {};
   bool isDialogOpen = false;
 
   @override
@@ -136,63 +137,81 @@ class _AddState extends State<Add> {
       if (documentSnapshot.exists) {
         int setIndex = 0;
         List<String> currentTimestamps = [];
+        List<String> currentMoods = [];
         List<List<String>> currentCategories = [];
         Map<int, List<String>> newTimestamps = {};
+        Map<int, List<String>> newMoods = {};
         Map<int, List<List<String>>> newCategories = {};
 
         List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<String, dynamic>).entries.map((entry) => {
           'timestamp': entry.key,
-          'moods': entry.value as List<dynamic>
+          'moods': entry.value[0],
+          'categories': entry.value[1]
         }).toList();
 
         List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
 
         bool loopCompleted = false;
+        bool updated = false;
 
         for (String timestamp in sortedTimestamps) {
-          List<dynamic> moods = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp)['moods'];
+          var entry = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp);
 
-          if (moods.contains('Start')) {
+          String mood = entry['moods'];
+          String category = entry['categories'];
+
+          if (mood == 'Start') {
             currentTimestamps = [];
             currentCategories = [];
-          } else if (moods.contains('Finish')) {
+            currentMoods = [];
+          } else if (mood == 'Finish') {
             newTimestamps[setIndex] = currentTimestamps;
             newCategories[setIndex] = currentCategories;
+            newMoods[setIndex] = currentMoods;
             setIndex++;
           } else {
             currentTimestamps.add(timestamp);
+            currentMoods.add(mood);
 
-            await sendToPython(file, fontSize, timestamp);
-            currentCategories.add(resultList);
+            if (category.isEmpty) {
+              await sendToPython(file, fontSize, timestamp);
+              currentCategories.add(resultList);
 
-            Map<String, dynamic> existingData = documentSnapshot.data() as Map<String, dynamic>;
-            List<dynamic> existingCategories = existingData[timestamp] ?? [];
-            existingCategories.addAll(resultList);
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid.toString())
+                  .update({
+                timestamp: [mood, result],
+              });
+              updated = true;
 
-            await FirebaseFirestore.instance.collection('users').doc(user.uid.toString()).update({
-              timestamp: existingCategories,
-            });
-
-            print('Fetched categories: $result');
-            resultList = [];
-
-            // Check if all timestamps and categories have been processed
-            if (sortedTimestamps.length - 2 == currentCategories.length) {
+              print('Fetched categories: $result');
+              resultList = [];
+            } else {
+              print(category);
               loopCompleted = true;
+              updated = true;
             }
           }
-
-          if (loopCompleted) {
-            Navigator.pop(context);
-            setState(() {
-              timestamps = newTimestamps;
-              categories = newCategories;
-              loopCompleted = false;
-            });
-            print('All timestamps: $timestamps');
-            print('All categories: $categories');
-          }
         };
+
+        if (sortedTimestamps.length - (2 * setIndex) == currentCategories.length) {
+          loopCompleted = true;
+        }
+
+        if (loopCompleted && updated) {
+          setState(() {
+            timestampList = newTimestamps;
+            moodList = newMoods;
+            categoryList = newCategories;
+          });
+          Navigator.pop(context);
+          print('All timestamps: $timestampList');
+          print('All categories: $categories');
+          loopCompleted = false;
+          updated = false;
+        }
+
       } else {
         Navigator.pop(context);
         print('User document does not exist.');
@@ -564,7 +583,7 @@ class _AddState extends State<Add> {
                           .doc(user.uid.toString())
                           .set({formatTimestamp(Timestamp.now()).toString(): [
                         selectedEmoji,
-                        cat
+                        categories
                       ]},
                           SetOptions(merge: true)
                       );
@@ -600,18 +619,16 @@ class _AddState extends State<Add> {
                   if (Provider.of<TimerProvider>(context, listen: false).continued == true){
                     Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
                   } else {
-                    if (startTimestamp != null) {
-                      FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(user.uid.toString())
-                          .update({formatTimestamp(startTimestamp).toString(): FieldValue.delete()})
-                          .then((_) {
-                        print("Entry deleted successfully.");
-                      })
-                          .catchError((error) {
-                        print("Failed to delete entry: $error");
-                      });
-                    }
+                    FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid.toString())
+                        .update({formatTimestamp(startTimestamp).toString(): FieldValue.delete()})
+                        .then((_) {
+                      print("Entry deleted successfully.");
+                    })
+                        .catchError((error) {
+                      print("Failed to delete entry: $error");
+                    });
                     Provider.of<TimerProvider>(context, listen: false).setStart(true);
                   }
                 },
@@ -783,21 +800,6 @@ class _AddState extends State<Add> {
                                 ),
                               ),
                             ],
-                          ),
-                          Container(
-                              margin: EdgeInsets.only(top: (0.03*height)),
-                              child: Text(
-                                  'Result: $result',
-                                  style: TextStyle(
-                                    fontFamily: "Quicksand",
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.5,
-                                    color: Colors.black,
-                                    fontSize: fontSize * 1.6,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  overflow: TextOverflow.clip
-                              )
                           ),
                         ]
                     )
