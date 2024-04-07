@@ -207,11 +207,10 @@ class _AddState extends State<Add> {
           });
           Navigator.pop(context);
           print('All timestamps: $timestampList');
-          print('All categories: $categories');
+          print('All categories: $categoryList');
           loopCompleted = false;
           updated = false;
         }
-
       } else {
         Navigator.pop(context);
         print('User document does not exist.');
@@ -381,7 +380,8 @@ class _AddState extends State<Add> {
                         .collection('users')
                         .doc(user.uid.toString())
                         .set({formatTimestamp(Timestamp.now()).toString(): [
-                      'Finish'
+                      'Finish',
+                      ''
                           ]},
                         SetOptions(merge: true)
                     );
@@ -583,7 +583,7 @@ class _AddState extends State<Add> {
                           .doc(user.uid.toString())
                           .set({formatTimestamp(Timestamp.now()).toString(): [
                         selectedEmoji,
-                        categories
+                        ''
                       ]},
                           SetOptions(merge: true)
                       );
@@ -679,7 +679,8 @@ class _AddState extends State<Add> {
                         .collection('users')
                         .doc(user.uid.toString())
                         .set({formatTimestamp(startTimestamp).toString(): [
-                          'Start'
+                          'Start',
+                      ''
                     ]},
                         SetOptions(merge: true)
                     );
@@ -762,7 +763,7 @@ class _AddState extends State<Add> {
                                         await pickFile(fontSize);
                                       },
                                       child: Text(
-                                          'Choose File',
+                                          'Upload File',
                                           style: TextStyle(
                                             fontFamily: "Quicksand",
                                             fontWeight: FontWeight.w600,

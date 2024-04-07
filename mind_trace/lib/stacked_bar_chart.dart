@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class StackedBarChart extends StatefulWidget {
   final Map<int, List<int>> data;
   final Map<int, List<String>> timestamps;
-  Map<int, List<String>> categories;
+  final Map<int, List<String>> categories;
   final List<Color> colors;
   final double barWidth;
   final double maxHeight;
@@ -13,8 +13,6 @@ class StackedBarChart extends StatefulWidget {
   final Color borderColor;
   final double borderWidth;
   final Function(String mood, String timestamp, String categories)? onTap;
-  final double height;
-  final double width;
 
   StackedBarChart({
     required this.data,
@@ -29,8 +27,6 @@ class StackedBarChart extends StatefulWidget {
     required this.borderColor,
     required this.borderWidth,
     this.onTap,
-    required this.
-    height, required this.width,
   });
 
   @override
@@ -46,6 +42,21 @@ class _StackedBarChartState extends State<StackedBarChart> {
   void initState() {
     super.initState();
     _initializeBlockBorderColors();
+    _resetTapPositions();
+  }
+
+  @override
+  void didUpdateWidget(StackedBarChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data != widget.data) {
+      _initializeBlockBorderColors();
+      _resetTapPositions();
+    }
+  }
+
+  void _resetTapPositions() {
+    _previousBlockIndex = null;
+    _previousInnerBlockIndex = null;
   }
 
   void _initializeBlockBorderColors() {
@@ -59,14 +70,6 @@ class _StackedBarChartState extends State<StackedBarChart> {
   }
 
   @override
-  void didUpdateWidget(StackedBarChart oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data) {
-      _initializeBlockBorderColors();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) {
       // Return an empty container if there is no data
@@ -75,8 +78,8 @@ class _StackedBarChartState extends State<StackedBarChart> {
     }
 
     return SizedBox(
-        height: widget.height * 0.3,
-        width: widget.width * 0.9,
+        height: widget.maxHeight,
+        width: widget.maxWidth,
       child: GestureDetector(
         onTapDown: (TapDownDetails details) {
           handleTap(details, true);
@@ -177,7 +180,7 @@ class _StackedBarChartState extends State<StackedBarChart> {
     if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
       final categoryList = widget.categories[blockIndex];
       var categories = categoryList?[innerBlockIndex];
-      categories = categories?.replaceAll('[', '')?.replaceAll(']', '');
+      categories = categories?.replaceAll('[', '').replaceAll(']', '');
       return categories ?? '';
     }
     return '';
