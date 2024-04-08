@@ -46,7 +46,7 @@ class _TSliderState extends State<TSlider> {
     } else if (index == 9) {
       description = "You will be directed to the Files app. Tap the zip file once to uncompress.";
     } else if (index == 10) {
-      description = "Open MindTrace app and click on the 'Choose File' button. Open the uncompressed folder and navigate to 'Activity'.";
+      description = "Open MindTrace app and click on the 'Upload File' button. Open the uncompressed folder and navigate to 'Activity'.";
     } else if (index == 11) {
       description = "Select 'Browsing History'.";
     }

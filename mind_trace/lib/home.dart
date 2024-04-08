@@ -160,12 +160,12 @@ class _HomeState extends State<Home> {
       case 'High':
         return 3;
       default:
-        return 0; // Handle unknown mood values
+        return 0;
     }
   }
 
   Future<void> getDatePicker(double height, double width) async {
-    double containerHeight = height * 0.3;
+    double containerHeight = height * 0.31;
     containerHeight = containerHeight > height ? height : containerHeight;
 
     setState(() {
@@ -174,7 +174,7 @@ class _HomeState extends State<Home> {
 
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) {
+      builder: (BuildContext context) {
         return PopScope(
           canPop: false,
           child: Container(
@@ -184,39 +184,69 @@ class _HomeState extends State<Home> {
             height: containerHeight,
             child: Column(
               children: [
-                Container(
-                  alignment: Alignment.topRight,
-                  padding: EdgeInsets.only(right: width*0.025, top: height*0.008, bottom: height*0.008),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF8F8F8),
-                  ),
-                  child: GestureDetector(
-                    onTap: () async {
-                      Navigator.pop(context);
-                      String convertedDate = convertTimestamp2(date.toString());
-                      print('Selected data: $convertedDate');
-                      setState(() {
-                        //reset
-                        moodText = '';
-                        timestampText = '';
-                        categoriesText = '';
-                        noCategory = false;
-                        noData = false;
-                        barPressed = false;
-                      });
-                      await fetchData(convertTimestamp2(date.toString()));
-                    },
-                    child: Text(
-                      'Done',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: width * 0.04,
-                        fontWeight: FontWeight.normal,
-                        color: Color(0xFF0062CC),
-                        decoration: TextDecoration.none,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.topLeft,
+                        padding: EdgeInsets.only(left: width*0.025, top: height*0.01, bottom: height*0.01),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF8F8F8),
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Cancel',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: width * 0.04,
+                              fontWeight: FontWeight.normal,
+                              color: Color(0xFF0062CC),
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.topRight,
+                          padding: EdgeInsets.only(right: width*0.025, top: height*0.01, bottom: height*0.01),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF8F8F8),
+                          ),
+                          child: GestureDetector(
+                            onTap: () async {
+                              Navigator.pop(context);
+                              String convertedDate = convertTimestamp2(date.toString());
+                              print('Selected data: $convertedDate');
+                              setState(() {
+                                //reset
+                                moodText = '';
+                                timestampText = '';
+                                categoriesText = '';
+                                noCategory = false;
+                                noData = false;
+                                barPressed = false;
+                              });
+                              await fetchData(convertTimestamp2(date.toString()));
+                            },
+                            child: Text(
+                              'Done',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                fontSize: width * 0.04,
+                                fontWeight: FontWeight.normal,
+                                color: Color(0xFF0062CC),
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
                 ),
                 SizedBox(
                   height: containerHeight - 50,
@@ -248,13 +278,13 @@ class _HomeState extends State<Home> {
       canPop: false,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SingleChildScrollView(
+        body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  margin: EdgeInsets.only(top: height*0.1),
+                  //margin: EdgeInsets.only(top: height*0.1),
                   child: Text(
                     'Mood Progression',
                     style: TextStyle(
@@ -298,32 +328,6 @@ class _HomeState extends State<Home> {
                       ),
                     ],
                   ),
-                ),
-                Container(
-                    margin: EdgeInsets.only(bottom: height*0.02),
-                    alignment: Alignment.center,
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          await getDatePicker(height, width);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: Size((0.25*width), (0.02*height)),
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)
-                          ),
-                          elevation: 2.0,
-                        ),
-                        child: Text(
-                            'Generate',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Color(0xFF2A364E),
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.w400
-                            )
-                        )
-                    )
                 ),
                 noData ? Container(
                   child: Text(
@@ -462,6 +466,7 @@ class _HomeState extends State<Home> {
                                     textStyle: TextStyle(
                                         fontFamily: 'Quicksand',
                                         fontSize: fontSize*1.2,
+                                        fontWeight: FontWeight.normal,
                                         color: Colors.white
                                     ),
                                     message: 'Go to the + page and follow the instructions.',
@@ -477,6 +482,34 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                   ),
+                ),
+                Container(
+                    margin: EdgeInsets.only(top: height*0.02),
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          await getDatePicker(height, width);
+                          print(width);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: Size((0.35*width), (0.055*height)),
+                          backgroundColor: Color(0xFFA986E4),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(width*0.055)
+                          ),
+                          elevation: 2.0,
+                        ),
+                        child: Text(
+                            'Generate',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Quicksand',
+                                fontSize: fontSize*1.4,
+                                fontWeight: FontWeight.w600
+                            )
+                        )
+                    )
                 ),
               ],
             )

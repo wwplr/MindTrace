@@ -70,7 +70,7 @@ class _LoginState extends State<Login> {
           child: HomePage(),
         ),
       );
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       Navigator.pop(context);
       popup('Incorrect email or password');
     }

@@ -30,40 +30,40 @@ class StackedBarChart extends StatefulWidget {
   });
 
   @override
-  _StackedBarChartState createState() => _StackedBarChartState();
+  StackedBarChartState createState() => StackedBarChartState();
 }
 
-class _StackedBarChartState extends State<StackedBarChart> {
-  late List<List<Color?>> _blockBorderColors;
-  int? _previousBlockIndex;
-  int? _previousInnerBlockIndex;
+class StackedBarChartState extends State<StackedBarChart> {
+  late List<List<Color?>> blockBorderColors;
+  int? previousBlockIndex;
+  int? previousInnerBlockIndex;
 
   @override
   void initState() {
     super.initState();
-    _initializeBlockBorderColors();
-    _resetTapPositions();
+    initializeBlockBorderColors();
+    resetTapPositions();
   }
 
   @override
   void didUpdateWidget(StackedBarChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data) {
-      _initializeBlockBorderColors();
-      _resetTapPositions();
+      initializeBlockBorderColors();
+      resetTapPositions();
     }
   }
 
-  void _resetTapPositions() {
-    _previousBlockIndex = null;
-    _previousInnerBlockIndex = null;
+  void resetTapPositions() {
+    previousBlockIndex = null;
+    previousInnerBlockIndex = null;
   }
 
-  void _initializeBlockBorderColors() {
+  void initializeBlockBorderColors() {
     if (widget.data.isEmpty) {
-      _blockBorderColors = [];
+      blockBorderColors = [];
     } else {
-      _blockBorderColors = List.generate(widget.data.length, (index) {
+      blockBorderColors = List.generate(widget.data.length, (index) {
         return List.generate(widget.data[index]!.length, (innerIndex) => null);
       });
     }
@@ -86,9 +86,9 @@ class _StackedBarChartState extends State<StackedBarChart> {
         },
         onTapCancel: () {
           setState(() {
-            _initializeBlockBorderColors();
-            _previousBlockIndex = null;
-            _previousInnerBlockIndex = null;
+            initializeBlockBorderColors();
+            previousBlockIndex = null;
+            previousInnerBlockIndex = null;
           });
         },
         child: Container( // Wrap CustomPaint with Container
@@ -105,9 +105,9 @@ class _StackedBarChartState extends State<StackedBarChart> {
               borderRadius: widget.borderRadius,
               borderColor: widget.borderColor,
               borderWidth: widget.borderWidth,
-              blockBorderColors: _blockBorderColors,
-              previousBlockIndex: _previousBlockIndex,
-              previousInnerBlockIndex: _previousInnerBlockIndex,
+              blockBorderColors: blockBorderColors,
+              previousBlockIndex: previousBlockIndex,
+              previousInnerBlockIndex: previousInnerBlockIndex,
             ),
           ),
         ),
@@ -128,24 +128,29 @@ class _StackedBarChartState extends State<StackedBarChart> {
       final maxTotalMoodChanges = widget.data.values.map((e) => e.length).reduce((value, element) => value > element ? value : element);
       final blockHeight = widget.maxHeight / maxTotalMoodChanges;
 
-      final blockIndex = ((tapPosition.dx - barStartPosition) / (widget.barWidth + widget.barSpacing)).floor();
-      final innerBlockIndex = ((widget.maxHeight - tapPosition.dy) / blockHeight).floor();
-
-      if (blockIndex >= 0 && blockIndex < widget.data.length) {
+      for (int blockIndex = 0; blockIndex < widget.data.length; blockIndex++) {
         final moodChanges = widget.data[blockIndex] ?? [];
-        if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
-          if (_previousBlockIndex != null && _previousInnerBlockIndex != null) {
-            _blockBorderColors[_previousBlockIndex!][_previousInnerBlockIndex!] = null;
-          }
-          _blockBorderColors[blockIndex][innerBlockIndex] = isPressed ? widget.colors[moodChanges[innerBlockIndex] - 1] : widget.borderColor;
-          _previousBlockIndex = blockIndex;
-          _previousInnerBlockIndex = innerBlockIndex;
-          if (widget.onTap != null) {
-            final moodValue = moodChanges[innerBlockIndex];
-            final mood = getMood(moodValue);
-            final timestamp = getTimestamp(blockIndex, innerBlockIndex);
-            final category = getCategories(blockIndex, innerBlockIndex);
-            widget.onTap!(mood, timestamp, category);
+        final startX = barStartPosition + (blockIndex * (widget.barWidth + widget.barSpacing));
+        final endX = startX + widget.barWidth;
+
+        for (int innerBlockIndex = 0; innerBlockIndex < moodChanges.length; innerBlockIndex++) {
+          final startY = widget.maxHeight - (innerBlockIndex + 1) * blockHeight;
+          final endY = startY + blockHeight;
+
+          if (tapPosition.dx >= startX && tapPosition.dx <= endX && tapPosition.dy >= startY && tapPosition.dy <= endY) {
+            if (previousBlockIndex != null && previousInnerBlockIndex != null) {
+              blockBorderColors[previousBlockIndex!][previousInnerBlockIndex!] = null;
+            }
+            blockBorderColors[blockIndex][innerBlockIndex] = isPressed ? widget.colors[moodChanges[innerBlockIndex] - 1] : widget.borderColor;
+            previousBlockIndex = blockIndex;
+            previousInnerBlockIndex = innerBlockIndex;
+            if (widget.onTap != null) {
+              final moodValue = moodChanges[innerBlockIndex];
+              final mood = getMood(moodValue);
+              final timestamp = getTimestamp(blockIndex, innerBlockIndex);
+              final category = getCategories(blockIndex, innerBlockIndex);
+              widget.onTap!(mood, timestamp, category);
+            }
           }
         }
       }

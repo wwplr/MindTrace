@@ -55,9 +55,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return
       MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(),
-      home: const MainPage(),
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return MediaQuery(
+            child: child!,
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
+          );
+        },
+        theme: ThemeData(),
+        home: const MainPage(),
     );
   }
 }

@@ -262,8 +262,9 @@ class _AddState extends State<Add> {
   }
 
   void popup() {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    double textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
+    double height = MediaQuery.of(context).size.height / textScaleFactor;
+    double width = MediaQuery.of(context).size.width / textScaleFactor;
     double fontSize = width * 0.04;
 
     showDialog(
@@ -353,7 +354,7 @@ class _AddState extends State<Add> {
                       )
                   ),
                   style: ElevatedButton.styleFrom(
-                    fixedSize: Size(0.3 * width, 0.045 * height),
+                    fixedSize: Size(width*0.35, height*0.048),
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(100)
@@ -399,7 +400,7 @@ class _AddState extends State<Add> {
                       )
                   ),
                   style: ElevatedButton.styleFrom(
-                    fixedSize: Size(0.28 * width, 0.04 * height),
+                    fixedSize: Size(0.3 * width, 0.045 * height),
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(100)
