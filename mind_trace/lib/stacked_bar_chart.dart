@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class StackedBarChart extends StatefulWidget {
-  final Map<int, List<int>> data;
-  final Map<int, List<String>> timestamps;
+  final Map<int, List<int>> mood;
+  final Map<int, List<String>> date;
+  final Map<int, List<String>> time;
   final Map<int, List<String>> categories;
   final List<Color> colors;
   final double barWidth;
@@ -12,11 +13,12 @@ class StackedBarChart extends StatefulWidget {
   final double borderRadius;
   final Color borderColor;
   final double borderWidth;
-  final Function(String mood, String timestamp, String categories)? onTap;
+  final Function(String mood, String date, String time, String categories)? onTap;
 
   StackedBarChart({
-    required this.data,
-    required this.timestamps,
+    required this.mood,
+    required this.date,
+    required this.time,
     required this.categories,
     required this.colors,
     required this.barWidth,
@@ -48,7 +50,7 @@ class StackedBarChartState extends State<StackedBarChart> {
   @override
   void didUpdateWidget(StackedBarChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data) {
+    if (oldWidget.mood != widget.mood) {
       initializeBlockBorderColors();
       resetTapPositions();
     }
@@ -60,18 +62,18 @@ class StackedBarChartState extends State<StackedBarChart> {
   }
 
   void initializeBlockBorderColors() {
-    if (widget.data.isEmpty) {
+    if (widget.mood.isEmpty) {
       blockBorderColors = [];
     } else {
-      blockBorderColors = List.generate(widget.data.length, (index) {
-        return List.generate(widget.data[index]!.length, (innerIndex) => null);
+      blockBorderColors = List.generate(widget.mood.length, (index) {
+        return List.generate(widget.mood[index]!.length, (innerIndex) => null);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.data.isEmpty) {
+    if (widget.mood.isEmpty) {
       // Return an empty container if there is no data
       return Container(
       );
@@ -96,8 +98,9 @@ class StackedBarChartState extends State<StackedBarChart> {
           height: widget.maxHeight, // Set height
           child: CustomPaint(
             painter: BarChartPainter(
-              data: widget.data,
-              timestamps: widget.timestamps,
+              mood: widget.mood,
+              date: widget.date,
+              time: widget.time,
               categories: widget.categories,
               colors: widget.colors,
               barWidth: widget.barWidth,
@@ -120,16 +123,16 @@ class StackedBarChartState extends State<StackedBarChart> {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
       final tapPosition = renderBox.globalToLocal(details.globalPosition);
 
-      final totalBarsWidth = widget.data.length * widget.barWidth;
-      final totalSpacing = (widget.data.length - 1) * widget.barSpacing;
+      final totalBarsWidth = widget.mood.length * widget.barWidth;
+      final totalSpacing = (widget.mood.length - 1) * widget.barSpacing;
       final totalWidth = totalBarsWidth + totalSpacing;
       final barStartPosition = (widget.maxWidth - totalWidth) / 2;
 
-      final maxTotalMoodChanges = widget.data.values.map((e) => e.length).reduce((value, element) => value > element ? value : element);
+      final maxTotalMoodChanges = widget.mood.values.map((e) => e.length).reduce((value, element) => value > element ? value : element);
       final blockHeight = widget.maxHeight / maxTotalMoodChanges;
 
-      for (int blockIndex = 0; blockIndex < widget.data.length; blockIndex++) {
-        final moodChanges = widget.data[blockIndex] ?? [];
+      for (int blockIndex = 0; blockIndex < widget.mood.length; blockIndex++) {
+        final moodChanges = widget.mood[blockIndex] ?? [];
         final startX = barStartPosition + (blockIndex * (widget.barWidth + widget.barSpacing));
         final endX = startX + widget.barWidth;
 
@@ -147,9 +150,10 @@ class StackedBarChartState extends State<StackedBarChart> {
             if (widget.onTap != null) {
               final moodValue = moodChanges[innerBlockIndex];
               final mood = getMood(moodValue);
-              final timestamp = getTimestamp(blockIndex, innerBlockIndex);
+              final date = getDate(blockIndex, innerBlockIndex);
+              final time = getTime(blockIndex, innerBlockIndex);
               final category = getCategories(blockIndex, innerBlockIndex);
-              widget.onTap!(mood, timestamp, category);
+              widget.onTap!(mood, date, time, category);
             }
           }
         }
@@ -170,18 +174,28 @@ class StackedBarChartState extends State<StackedBarChart> {
     }
   }
 
-  String getTimestamp(int blockIndex, int innerBlockIndex) {
-    final moodChanges = widget.data[blockIndex] ?? [];
+  String getDate(int blockIndex, int innerBlockIndex) {
+    final moodChanges = widget.mood[blockIndex] ?? [];
     if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
-      final timestampList = widget.timestamps[blockIndex];
-      final timestamp = timestampList?[innerBlockIndex];
-      return timestamp ?? '';
+      final dateList = widget.date[blockIndex];
+      final date = dateList?[innerBlockIndex];
+      return date ?? '';
+    }
+    return '';
+  }
+
+  String getTime(int blockIndex, int innerBlockIndex) {
+    final moodChanges = widget.mood[blockIndex] ?? [];
+    if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
+      final timeList = widget.time[blockIndex];
+      final time = timeList?[innerBlockIndex];
+      return time ?? '';
     }
     return '';
   }
 
   String getCategories(int blockIndex, int innerBlockIndex) {
-    final moodChanges = widget.data[blockIndex] ?? [];
+    final moodChanges = widget.mood[blockIndex] ?? [];
     if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
       final categoryList = widget.categories[blockIndex];
       var categories = categoryList?[innerBlockIndex];
@@ -194,8 +208,9 @@ class StackedBarChartState extends State<StackedBarChart> {
 }
 
 class BarChartPainter extends CustomPainter {
-  final Map<int, List<int>?> data;
-  final Map<int, List<String>> timestamps;
+  final Map<int, List<int>?> mood;
+  final Map<int, List<String>> date;
+  final Map<int, List<String>> time;
   final Map<int, List<String>> categories;
   final List<Color> colors;
   final double barWidth;
@@ -208,8 +223,9 @@ class BarChartPainter extends CustomPainter {
   final int? previousInnerBlockIndex;
 
   BarChartPainter({
-    required this.data,
-    required this.timestamps,
+    required this.mood,
+    required this.date,
+    required this.time,
     required this.categories,
     required this.colors,
     required this.barWidth,
@@ -224,16 +240,16 @@ class BarChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final totalBarsWidth = data.length * barWidth;
-    final totalSpacing = (data.length - 1) * barSpacing;
+    final totalBarsWidth = mood.length * barWidth;
+    final totalSpacing = (mood.length - 1) * barSpacing;
     final totalWidth = totalBarsWidth + totalSpacing;
     final barStartPosition = (size.width - totalWidth) / 2;
 
     double startX = barStartPosition;
     double startY = size.height;
 
-    for (int day = 0; day < data.length; day++) {
-      final moodChanges = data[day] ?? [];
+    for (int day = 0; day < mood.length; day++) {
+      final moodChanges = mood[day] ?? [];
       final totalMoodChanges = moodChanges.length;
 
       for (int i = 0; i < totalMoodChanges; i++) {
@@ -253,12 +269,11 @@ class BarChartPainter extends CustomPainter {
         }
 
         final maxTotalMoodChanges =
-        data.values.map((e) => e!.length).reduce((value, element) => value > element ? value : element);
+        mood.values.map((e) => e!.length).reduce((value, element) => value > element ? value : element);
         final barHeight = size.height / maxTotalMoodChanges;
 
         Rect rect;
         if (totalMoodChanges == 1) {
-          // Adjust border radius for bars with only one block
           rect = Rect.fromLTRB(
             startX,
             startY - barHeight,

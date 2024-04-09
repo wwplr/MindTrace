@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'add.dart';
 import 'firebase_options.dart';
 import 'notification.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
@@ -18,13 +19,15 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await flutterNotification.initialiseNotifications();
 
+  tz.initializeTimeZones();
+
   if (afternoonScheduledDateTime.isBefore(now)) {
     afternoonScheduledDateTime = afternoonScheduledDateTime.add(Duration(days: 1));
   }
   await flutterNotification.scheduleNotification(
     id: 1,
     title: 'MindTrace',
-    body: "Are you on TikTok? Don't for get to log your mood.",
+    body: "Are you on TikTok? Don't forget to log your mood.",
     scheduledNotificationDateTime: afternoonScheduledDateTime,
   );
 
@@ -35,7 +38,7 @@ void main() async {
   await flutterNotification.scheduleNotification(
     id: 2,
     title: 'MindTrace',
-    body: "Are you on TikTok? Don't for get to log your mood.",
+    body: "Are you on TikTok? Don't forget to log your mood.",
     scheduledNotificationDateTime: eveningScheduledDateTime,
   );
 

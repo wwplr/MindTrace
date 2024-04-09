@@ -239,6 +239,7 @@ class _LoginState extends State<Login> {
                                               margin: EdgeInsets.only(left: (0.1*width), right: (0.1*width)),
                                               child: Form(
                                                   child: TextFormField(
+                                                    keyboardType: TextInputType.emailAddress,
                                                     style:  TextStyle(
                                                         fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
@@ -327,63 +328,63 @@ class _LoginState extends State<Login> {
                                                   child: Text('Login',
                                                       textAlign: TextAlign.center,
                                                       style: TextStyle(
-                                                          fontFamily: "Quicksand",
-                                                          fontWeight: FontWeight.w600,
-                                                          letterSpacing: 0.5,
-                                                          color: Colors.white,
-                                                          fontSize: fontSize*1.75,
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w600,
+                                                        letterSpacing: 0.5,
+                                                        color: Colors.white,
+                                                        fontSize: fontSize*1.75,
                                                       )
                                                   )
                                               )
                                           ),
                                           Container(
-                                                    margin: EdgeInsets.only(bottom: (0.01*height)),
-                                                    child: Text(
-                                                        "Don't have an account?",
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                            fontFamily: "Quicksand",
-                                                            fontWeight: FontWeight.w500,
-                                                            fontSize: fontSize*1.25,
-                                                            fontStyle: FontStyle.normal,
-                                                            height: 1.75,
-                                                            letterSpacing: 0.75,
-                                                            color: Colors.black
-                                                        )
-                                                    )
-                                                ),
-                                                Container(
-                                                    child: ElevatedButton(
-                                                        onPressed: () {
-                                                          Navigator.push(
-                                                            context,
-                                                            PageTransition(
-                                                              type: PageTransitionType.fade,
-                                                              child: SignUp(),
-                                                            ),
-                                                          );
-                                                        },
-                                                        style: ElevatedButton.styleFrom(
-                                                          fixedSize: Size(0.35*width, 0.06*height),
-                                                          backgroundColor: Color(0xFF49688D),
-                                                          shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(100)
-                                                          ),
-                                                          elevation: 2.0,
-                                                        ),
-                                                        child: Text(
-                                                            'Sign Up',
-                                                            textAlign: TextAlign.center,
-                                                            style: TextStyle(
-                                                              fontFamily: "Quicksand",
-                                                              fontWeight: FontWeight.w600,
-                                                              letterSpacing: 0.5,
-                                                              color: Colors.white,
-                                                              fontSize: fontSize*1.5,
-                                                            )
-                                                        )
-                                                    )
-                                                ),
+                                              margin: EdgeInsets.only(bottom: (0.01*height)),
+                                              child: Text(
+                                                  "Don't have an account?",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontFamily: "Quicksand",
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: fontSize*1.25,
+                                                      fontStyle: FontStyle.normal,
+                                                      height: 1.75,
+                                                      letterSpacing: 0.75,
+                                                      color: Colors.black
+                                                  )
+                                              )
+                                          ),
+                                          Container(
+                                              child: ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      PageTransition(
+                                                        type: PageTransitionType.fade,
+                                                        child: SignUp(),
+                                                      ),
+                                                    );
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    fixedSize: Size(0.35*width, 0.06*height),
+                                                    backgroundColor: Color(0xFF49688D),
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(100)
+                                                    ),
+                                                    elevation: 2.0,
+                                                  ),
+                                                  child: Text(
+                                                      'Sign Up',
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontFamily: "Quicksand",
+                                                        fontWeight: FontWeight.w600,
+                                                        letterSpacing: 0.5,
+                                                        color: Colors.white,
+                                                        fontSize: fontSize*1.5,
+                                                      )
+                                                  )
+                                              )
+                                          ),
                                         ],
                                       )
                                   )

@@ -6,6 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 class FlutterNotification {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+
   Future<void> initialiseNotifications() async {
     const initSettings = InitializationSettings(
       iOS: DarwinInitializationSettings(),
@@ -13,7 +14,7 @@ class FlutterNotification {
     await flutterLocalNotificationsPlugin.initialize(initSettings);
   }
 
-  Future scheduleNotification(
+  Future<void> scheduleNotification(
       {int id = 0,
         String? title,
         String? body,
@@ -36,5 +37,9 @@ class FlutterNotification {
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime
     );
+  }
+
+  Future<void> cancelNotification(int id) async {
+    await flutterLocalNotificationsPlugin.cancel(id);
   }
 }

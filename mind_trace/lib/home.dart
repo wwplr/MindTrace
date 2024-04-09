@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:mind_trace/stacked_bar_chart.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class Home extends StatefulWidget {
   @override
@@ -14,10 +15,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final user = FirebaseAuth.instance.currentUser!;
   String moodText = '';
-  String timestampText = '';
+  String dateText = '';
+  String timeText = '';
   String categoriesText = '';
   Map<int, List<int>> moodList = {};
-  Map<int, List<String>> timestampList = {};
+  Map<int, List<String>> dateList = {};
+  Map<int, List<String>> timeList = {};
   Map<int, List<String>> categoryList = {};
   DateTime date = DateTime.now();
   String noDataText = '';
@@ -34,20 +37,29 @@ class _HomeState extends State<Home> {
     ]);
   }
 
-  String convertTimestamp(String timestamp) {
+  String convertDate(String timestamp) {
     DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
-    DateTime ts = inputFormat.parse(timestamp);
+    DateTime date = inputFormat.parse(timestamp);
 
-    DateFormat outputFormat = DateFormat('E, d MMM hh:mm:ss a');
+    DateFormat outputFormat = DateFormat('E, d MMMM yyyy');
 
-    return outputFormat.format(ts);
+    return outputFormat.format(date);
   }
 
-  String convertTimestamp2(String timestamp) {
+  String convertTime(String timestamp) {
+    DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+    DateTime time = inputFormat.parse(timestamp);
+
+    DateFormat outputFormat = DateFormat('hh:mm:ss a');
+
+    return outputFormat.format(time);
+  }
+
+  String convertTimestamp(String timestamp) {
     DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
     DateTime ts = inputFormat.parse(timestamp);
 
-    DateFormat outputFormat = DateFormat('yyyy-MM-dd 00:00:00');
+    DateFormat outputFormat = DateFormat('yyyy-MM-dd');
     return outputFormat.format(ts);
   }
 
@@ -63,11 +75,13 @@ class _HomeState extends State<Home> {
 
       if (documentSnapshot.exists) {
         List<int> currentMoods = [];
-        List<String> currentTimestamps = [];
+        List<String> currentDate = [];
+        List<String> currentTime = [];
         List<String> currentCategories = [];
         int setIndex = 0;
         Map<int, List<int>> newMoods = {};
-        Map<int, List<String>> newTimestamps = {};
+        Map<int, List<String>> newDates = {};
+        Map<int, List<String>> newTimes = {};
         Map<int, List<String>> newCategories = {};
 
         List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<
@@ -89,9 +103,6 @@ class _HomeState extends State<Home> {
             .toList()
           ..sort();
 
-        print('Filtered Data: $filteredData');
-
-
         if (filteredData.isNotEmpty) {
           for (String timestamp in filteredData) {
             var entry = data.firstWhere((entry) =>
@@ -99,20 +110,24 @@ class _HomeState extends State<Home> {
 
             String mood = entry['moods'];
             String category = entry['categories'];
-            String ts = convertTimestamp(timestamp);
+            String date = convertDate(timestamp);
+            String time = convertTime(timestamp);
 
             if (mood == 'Start') {
               currentMoods = [];
-              currentTimestamps = [];
+              currentDate = [];
+              currentTime = [];
               currentCategories = [];
             } else if (mood == 'Finish') {
               newMoods[setIndex] = currentMoods;
-              newTimestamps[setIndex] = currentTimestamps;
+              newDates[setIndex] = currentDate;
+              newTimes[setIndex] = currentTime;
               newCategories[setIndex] = currentCategories;
               setIndex++;
             } else {
               currentMoods.add(getMoodValue(mood));
-              currentTimestamps.add(ts);
+              currentDate.add(date);
+              currentTime.add(time);
               if (category.isEmpty) {
                 noCategory = true;
                 print('No categories found, please upload your browsing history.');
@@ -124,23 +139,25 @@ class _HomeState extends State<Home> {
             }
           }
         } else {
-          print('No data found for the selected date.');
           setState(() {
             noData = true;
             noDataText = 'No data found for the selected date.';
             moodText = 'No data logged';
-            timestampText = 'No data logged';
+            dateText = 'No data logged';
+            timeText = 'No data logged';
             categoriesText = 'No data logged';
           });
         }
 
         print('Fetched data: $newMoods');
-        print('Fetched timestamps: $newTimestamps');
+        print('Fetched dates: $newDates');
+        print('Fetched times: $newTimes');
         print('Fetched categories: $newCategories');
 
         setState(() {
           moodList = newMoods;
-          timestampList = newTimestamps;
+          dateList = newDates;
+          timeList = newTimes;
           categoryList = newCategories;
         });
       } else {
@@ -169,7 +186,7 @@ class _HomeState extends State<Home> {
     containerHeight = containerHeight > height ? height : containerHeight;
 
     setState(() {
-      date = DateTime.now();
+      date = tz.TZDateTime.from(DateTime.now(), tz.local);
     });
 
     showCupertinoModalPopup<void>(
@@ -220,18 +237,19 @@ class _HomeState extends State<Home> {
                           child: GestureDetector(
                             onTap: () async {
                               Navigator.pop(context);
-                              String convertedDate = convertTimestamp2(date.toString());
+                              String convertedDate = convertTimestamp(date.toString());
                               print('Selected data: $convertedDate');
                               setState(() {
                                 //reset
                                 moodText = '';
-                                timestampText = '';
+                                dateText = '';
+                                timeText = '';
                                 categoriesText = '';
                                 noCategory = false;
                                 noData = false;
                                 barPressed = false;
                               });
-                              await fetchData(convertTimestamp2(date.toString()));
+                              await fetchData(convertTimestamp(date.toString()));
                             },
                             child: Text(
                               'Done',
@@ -278,13 +296,13 @@ class _HomeState extends State<Home> {
       canPop: false,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
+        body: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  //margin: EdgeInsets.only(top: height*0.1),
+                  margin: EdgeInsets.only(top: height*0.1),
                   child: Text(
                     'Mood Progression',
                     style: TextStyle(
@@ -304,27 +322,27 @@ class _HomeState extends State<Home> {
                         text: 'High',
                         color: Colors.green,
                         space: 0.01 * width,
-                        fontSize: fontSize * 1.3,
-                        width: 0.015 * width,
-                        height: 0.015 * width,
+                        fontSize: fontSize * 1.5,
+                        width: 0.02 * width,
+                        height: 0.02 * width,
                       ),
                       SizedBox(width: 0.05 * width),
                       buildLegend(
                         text: 'OK',
-                        color: Colors.yellow,
+                        color: Colors.yellow.shade600,
                         space: 0.01 * width,
-                        fontSize: fontSize * 1.3,
-                        width: 0.015 * width,
-                        height: 0.015 * width,
+                        fontSize: fontSize * 1.5,
+                        width: 0.02 * width,
+                        height: 0.02 * width,
                       ),
                       SizedBox(width: 0.05 * width),
                       buildLegend(
                         text: 'Low',
                         color: Colors.red,
                         space: 0.01 * width,
-                        fontSize: fontSize * 1.3,
-                        width: 0.015 * width,
-                        height: 0.015 * width,
+                        fontSize: fontSize * 1.5,
+                        width: 0.02 * width,
+                        height: 0.02 * width,
                       ),
                     ],
                   ),
@@ -338,25 +356,27 @@ class _HomeState extends State<Home> {
                   ),
                 ) : Container(
                   child: StackedBarChart(
-                      data: moodList,
-                      timestamps: timestampList,
+                      mood: moodList,
+                      date: dateList,
+                      time: timeList,
                       categories: categoryList,
                       colors: [
                         Colors.red,
-                        Colors.yellow,
+                        Colors.yellow.shade600,
                         Colors.green,
                       ],
-                      barWidth: width*0.06,
-                      maxHeight: height*0.27,
+                      barWidth: width*0.065,
+                      maxHeight: height*0.3,
                       maxWidth: width*0.9,
                       barSpacing: width*0.05,
-                      borderRadius: 20,
+                      borderRadius: width*0.047,
                       borderColor: Colors.white,
                       borderWidth: width*0.0025,
-                      onTap: (m, ts, c) {
+                      onTap: (m, d, t, c) {
                         setState(() {
                           moodText = m;
-                          timestampText = ts;
+                          dateText = d;
+                          timeText = t;
                           categoriesText = c.toString();
                           barPressed = true;
                         });
@@ -367,7 +387,7 @@ class _HomeState extends State<Home> {
                   margin: EdgeInsets.only(top: height * 0.02),
                   child: SizedBox(
                     width: width * 0.85,
-                    height: height * 0.18,
+                    height: height * 0.21,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Color(0xFFFFF8EA),
@@ -389,12 +409,34 @@ class _HomeState extends State<Home> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: 'Timestamp:',
+                                        text: 'Date:',
                                         style: TextStyle(
                                             fontWeight: FontWeight.w600
                                         ),
                                       ),
-                                      TextSpan(text: ' $timestampText')
+                                      TextSpan(text: ' $dateText')
+                                    ]
+                                )
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: width * 0.04, right: width * 0.04, top: height * 0.01),
+                            child: RichText(
+                                text: TextSpan(
+                                    style: TextStyle(
+                                        fontSize: fontSize * 1.4,
+                                        fontFamily: 'Quicksand',
+                                        color: Colors.black,
+                                        letterSpacing: width*0.0006
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Time:',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600
+                                        ),
+                                      ),
+                                      TextSpan(text: ' $timeText')
                                     ]
                                 )
                             ),
@@ -489,7 +531,6 @@ class _HomeState extends State<Home> {
                     child: ElevatedButton(
                         onPressed: () async {
                           await getDatePicker(height, width);
-                          print(width);
                         },
                         style: ElevatedButton.styleFrom(
                           fixedSize: Size((0.35*width), (0.055*height)),
@@ -511,6 +552,10 @@ class _HomeState extends State<Home> {
                         )
                     )
                 ),
+                SizedBox(
+                    width: width,
+                    height: height*0.15
+                )
               ],
             )
         ),

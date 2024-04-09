@@ -361,6 +361,7 @@ class _SignUpState extends State<SignUp> {
                                             padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.02*height)),
                                             child: Form(
                                                 child: TextFormField(
+                                                  keyboardType: TextInputType.emailAddress,
                                                   style: TextStyle(
                                                       fontSize: fontSize*1.3,
                                                       fontFamily: "Quicksand",

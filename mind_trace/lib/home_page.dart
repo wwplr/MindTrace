@@ -17,13 +17,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final user = FirebaseAuth.instance.currentUser!;
-  int selectedIndex = 0;
+  int selectedIndex = 1;
 
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 3))
+    Future.delayed(const Duration(milliseconds: 250))
         .then((value) => {FlutterNativeSplash.remove()}
     );
 
@@ -48,32 +48,46 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context){
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
 
     return PopScope(
         canPop: false,
         child: Scaffold(
-            backgroundColor: Colors.white,
-            bottomNavigationBar: CurvedNavigationBar(
-              buttonBackgroundColor: Color(0xFFC6F2FF),
-              iconPadding: width*0.047,
-              backgroundColor: Colors.white,
-              color: Color(0xFFC6F2FF),
-              animationDuration: Duration(milliseconds: 400),
-              index: selectedIndex,
-              onTap: bottomNavBar,
-              items: [
-                CurvedNavigationBarItem (
-                    child: Icon(Icons.bar_chart),
-                ),
-                CurvedNavigationBarItem (
-                  child: Icon(Icons.add),
-                ),
-                CurvedNavigationBarItem (
-                  child: Icon(Icons.person),
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                pages[selectedIndex],
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                    ),
+                    child: CurvedNavigationBar(
+                      buttonBackgroundColor: Color(0xFFC6F2FF),
+                      iconPadding: width*0.047,
+                      height: height*0.085,
+                      backgroundColor: Colors.transparent,
+                      color: Color(0xFFC6F2FF),
+                      animationDuration: Duration(milliseconds: 400),
+                      index: selectedIndex,
+                      onTap: bottomNavBar,
+                      items: [
+                        CurvedNavigationBarItem (
+                          child: Icon(Icons.bar_chart),
+                        ),
+                        CurvedNavigationBarItem (
+                          child: Icon(Icons.add),
+                        ),
+                        CurvedNavigationBarItem (
+                          child: Icon(Icons.person),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
-            ),
-            body: pages[selectedIndex]
+            )
         )
     );
   }
