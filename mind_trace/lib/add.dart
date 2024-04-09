@@ -19,10 +19,12 @@ class TimerProvider extends ChangeNotifier {
   bool _isSubmitted = false;
   bool _start = true;
   bool _continued = false;
+  bool _isNotificationScheduled = false;
   bool get isSubmitted => _isSubmitted;
   bool get start => _start;
   bool get continued => _continued;
   Timer get timer => _timer;
+  bool get isNotifiedScheduled => _isNotificationScheduled;
 
   void setStart(bool value) {
     _start = value;
@@ -37,6 +39,11 @@ class TimerProvider extends ChangeNotifier {
   void setSubmit(bool value) {
     _isSubmitted = value;
     _continued = false;
+    notifyListeners();
+  }
+
+  void setNotification(bool value) {
+    _isNotificationScheduled = value;
     notifyListeners();
   }
 
@@ -143,7 +150,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     print('App Lifecycle State: $state');
 
     final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(seconds: 5));
-    if (Provider.of<TimerProvider>(context, listen: false).isSubmitted == true &&
+    if (Provider.of<TimerProvider>(context, listen: false).isNotifiedScheduled == false &&
+        Provider.of<TimerProvider>(context, listen: false).isSubmitted == true &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
       print('Scheduling...');
       await flutterNotification.scheduleNotification(
@@ -152,6 +160,9 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
         body: "It's time to log your mood!",
         scheduledNotificationDateTime: logMoodTime,
       );
+      setState(() {
+        Provider.of<TimerProvider>(context, listen: false).setNotification(true);
+      });
     }
   }
 
@@ -719,7 +730,10 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                           SetOptions(merge: true)
                       );
                       await flutterNotification.cancelNotification(4);
-                      Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
+                      setState(() {
+                        Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
+                        Provider.of<TimerProvider>(context, listen: false).setNotification(false);
+                      });
                     } else {
                       popup();
                     }
@@ -847,7 +861,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.03;
-    String name = extractFirstName(username);
 
     return PopScope(
         canPop: false,
@@ -861,7 +874,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                             alignment: Alignment.centerLeft,
                             margin: EdgeInsets.only(top: height*0.09),
                             child: SizedBox(
-                              width: width * 0.75,
+                              width: width * 0.8,
                               height: height * 0.11,
                               child: DecoratedBox(
                                   decoration: BoxDecoration(
@@ -876,7 +889,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        margin: EdgeInsets.only(left: width*0.075),
+                                        margin: EdgeInsets.only(left: width*0.04),
                                         alignment: Alignment.topLeft,
                                         child: RichText(
                                             text: TextSpan(
@@ -894,7 +907,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                                     ),
                                                   ),
                                                   TextSpan(
-                                                      text: ' $name!',
+                                                      text: ' ${extractFirstName(username)}!',
                                                       style: TextStyle(
                                                         fontSize: fontSize * 2.5,
                                                         color: Color(0xFF2A364E),
@@ -906,7 +919,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                         ),
                                       ),
                                     Container(
-                                        margin: EdgeInsets.only(left: width*0.075),
+                                        margin: EdgeInsets.only(left: width*0.04),
                                         alignment: Alignment.topLeft,
                                         child: Text(
                                             "It's reflecting time! What's on your mind?",
@@ -955,15 +968,43 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                           Container(
                               alignment: Alignment.topLeft,
                               margin: EdgeInsets.only(top: height*0.03, left: width*0.075),
-                              child: Text(
-                                  'Upload TikTok browsing history',
-                                  style: TextStyle(
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: fontSize*1.2,
-                                      color: Colors.grey.shade700
-                                  )
-                              )
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                      child: Text(
+                                          'Upload TikTok browsing history',
+                                          style: TextStyle(
+                                              fontFamily: 'Quicksand',
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: fontSize*1.2,
+                                              color: Colors.grey.shade700
+                                          )
+                                      )
+                                  ),
+                                  SizedBox(
+                                      width: width*0.02
+                                  ),
+                                  Container(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          PageTransition(
+                                            type: PageTransitionType.fade,
+                                            child: TSlider(),
+                                          ),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.info,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ),
                           Container(
                             margin: EdgeInsets.only(top: height*0.01),
@@ -994,57 +1035,29 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                       Container(
                                         margin: EdgeInsets.only(top: height*0.03, bottom: height*0.03),
                                         alignment: Alignment.center,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                                child: ElevatedButton (
-                                                    onPressed: () async {
-                                                      await pickFile(fontSize, width, height);
-                                                    },
-                                                    child: Text(
-                                                        'Upload File',
-                                                        style: TextStyle(
-                                                          fontFamily: "Quicksand",
-                                                          fontWeight: FontWeight.w600,
-                                                          letterSpacing: 0.5,
-                                                          color: Color(0xFF2A364E),
-                                                          fontSize: fontSize * 1.4,
-                                                        )
-                                                    ),
-                                                    style: ElevatedButton.styleFrom(
-                                                      fixedSize: Size(0.4 * width, 0.055 * height),
-                                                      backgroundColor: Color(0xFFFFF8EA),
-                                                      shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(100)
-                                                      ),
-                                                      elevation: 2.0,
-                                                    )
+                                        child: ElevatedButton (
+                                            onPressed: () async {
+                                              await pickFile(fontSize, width, height);
+                                            },
+                                            child: Text(
+                                                'Upload File',
+                                                style: TextStyle(
+                                                  fontFamily: "Quicksand",
+                                                  fontWeight: FontWeight.w600,
+                                                  letterSpacing: 0.5,
+                                                  color: Color(0xFF2A364E),
+                                                  fontSize: fontSize * 1.4,
                                                 )
                                             ),
-                                            SizedBox(
-                                              width: width*0.02
-                                            ),
-                                            Container(
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    PageTransition(
-                                                      type: PageTransitionType.fade,
-                                                      child: TSlider(),
-                                                    ),
-                                                  );
-                                                },
-                                                child: Icon(
-                                                  Icons.info,
-                                                  color: Colors.black,
-                                                ),
+                                            style: ElevatedButton.styleFrom(
+                                              fixedSize: Size(0.4 * width, 0.055 * height),
+                                              backgroundColor: Color(0xFFFFF8EA),
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(100)
                                               ),
-                                            ),
-                                          ],
-                                        ),
+                                              elevation: 2.0,
+                                            )
+                                        )
                                       ),
                                       Container(
                                           alignment: Alignment.center,
