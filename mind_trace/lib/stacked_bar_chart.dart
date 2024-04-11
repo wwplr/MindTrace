@@ -39,10 +39,13 @@ class StackedBarChartState extends State<StackedBarChart> {
   late List<List<Color?>> blockBorderColors;
   int? previousBlockIndex;
   int? previousInnerBlockIndex;
+  final List<Widget> blocks = [];
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    scrollController = ScrollController();
     initializeBlockBorderColors();
     resetTapPositions();
   }
@@ -74,49 +77,284 @@ class StackedBarChartState extends State<StackedBarChart> {
   @override
   Widget build(BuildContext context) {
     if (widget.mood.isEmpty) {
-      // Return an empty container if there is no data
       return Container(
       );
     }
 
-    return SizedBox(
-        height: widget.maxHeight,
-        width: widget.maxWidth,
-      child: GestureDetector(
-        onTapDown: (TapDownDetails details) {
-          handleTap(details, true);
-        },
-        onTapCancel: () {
-          setState(() {
-            initializeBlockBorderColors();
-            previousBlockIndex = null;
-            previousInnerBlockIndex = null;
-          });
-        },
-        child: Container( // Wrap CustomPaint with Container
-          width: widget.maxWidth, // Set width
-          height: widget.maxHeight, // Set height
-          child: CustomPaint(
-            painter: BarChartPainter(
-              mood: widget.mood,
-              date: widget.date,
-              time: widget.time,
-              categories: widget.categories,
-              colors: widget.colors,
-              barWidth: widget.barWidth,
-              barSpacing: widget.barSpacing,
-              borderRadius: widget.borderRadius,
-              borderColor: widget.borderColor,
-              borderWidth: widget.borderWidth,
-              blockBorderColors: blockBorderColors,
-              previousBlockIndex: previousBlockIndex,
-              previousInnerBlockIndex: previousInnerBlockIndex,
+    final maxTotalMoodChanges = widget.mood.values.map((e) => e.length).reduce((value, element) => value > element? value : element);
+    final blockHeight = (widget.maxHeight / maxTotalMoodChanges) - widget.maxHeight/13;
+    final totalChartWidth = (widget.barWidth * widget.mood.length) + widget.barSpacing * (widget.mood.length - 1);
+    double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.03;
+
+    return (widget.mood.length >= 6) ? Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.only(left: widget.barWidth),
+          child: Column(
+            verticalDirection: VerticalDirection.up,
+            children: List.generate(
+                maxTotalMoodChanges,
+                    (index) {
+                  if (index == maxTotalMoodChanges - 1) {
+                    return Container(
+                      margin: EdgeInsets.only(top: blockHeight/1.8, bottom: blockHeight),
+                      child: Text(
+                          'End',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Quicksand',
+                              fontSize: fontSize*1.15
+                          )
+                      ),
+                    );
+                  } else if (index == 0) {
+                    return Container(
+                      child: Text(
+                          'Start',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Quicksand',
+                              fontSize: fontSize*1.15
+                          )
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      margin: EdgeInsets.only(bottom: blockHeight),
+                      child: Text(
+                          '${index * 20} min',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Quicksand',
+                              fontSize: fontSize*1.15
+                          )
+                      ),
+                    );
+                  }
+                }
             ),
           ),
         ),
-      )
+        Expanded(
+          child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.only(left: 0),
+              physics: AlwaysScrollableScrollPhysics(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: widget.maxWidth*0.075),
+                    child: SizedBox(
+                        width: totalChartWidth,
+                        height: widget.maxHeight,
+                        child: GestureDetector(
+                          onTapDown: (TapDownDetails details) {
+                            handleBlockTap(details, true);
+                          },
+                          onTapCancel: () {
+                            setState(() {
+                              initializeBlockBorderColors();
+                              previousBlockIndex = null;
+                              previousInnerBlockIndex = null;
+                            });
+                          },
+                          child: Container(
+                            child: CustomPaint(
+                              painter: BarChartPainter(
+                                mood: widget.mood,
+                                date: widget.date,
+                                time: widget.time,
+                                categories: widget.categories,
+                                colors: widget.colors,
+                                barWidth: widget.barWidth,
+                                barSpacing: widget.barSpacing,
+                                borderRadius: widget.borderRadius,
+                                borderColor: widget.borderColor,
+                                borderWidth: widget.borderWidth,
+                                blockBorderColors: blockBorderColors,
+                                previousBlockIndex: previousBlockIndex,
+                                previousInnerBlockIndex: previousInnerBlockIndex,
+                              ),
+                            ),
+                          ),
+                        )
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: widget.maxHeight/30, left: widget.maxWidth*0.105),
+                    child: Row(
+                      children: List.generate(
+                          widget.mood.length,
+                              (index) {
+                            if (index == 0) {
+                              return Container(
+                                child: Text(
+                                    (index + 1).toString(),
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Quicksand',
+                                        fontSize: fontSize*1.15
+                                    )
+                                ),
+                              );
+                            } else {
+                              return Container(
+                                margin: EdgeInsets.only(left: widget.barWidth*1.48),
+                                child: Text(
+                                    (index + 1).toString(),
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Quicksand',
+                                        fontSize: fontSize*1.15
+                                    )
+                                ),
+                              );
+                            }
+                          }
+                      ),
+                    ),
+                  ),
+                ],
+              )
+          ),
+        )
+      ],
+    ) : Stack (
+      children: [
+        Container(
+          margin: EdgeInsets.only(left: widget.barWidth),
+          child: Column(
+            verticalDirection: VerticalDirection.up,
+            children: List.generate(
+                maxTotalMoodChanges,
+                    (index) {
+                  if (index == maxTotalMoodChanges - 1) {
+                    return Container(
+                      margin: EdgeInsets.only(top: blockHeight/1.75, bottom: blockHeight),
+                      child: Text(
+                          'End',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Quicksand',
+                              fontSize: fontSize*1.15
+                          )
+                      ),
+                    );
+                  } else if (index == 0) {
+                    return Container(
+                      child: Text(
+                          'Start',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Quicksand',
+                              fontSize: fontSize*1.15
+                          )
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      margin: EdgeInsets.only(bottom: blockHeight),
+                      child: Text(
+                          '${index * 20} min',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Quicksand',
+                              fontSize: fontSize*1.15
+                          )
+                      ),
+                    );
+                  }
+                }
+            ),
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              child: SizedBox(
+                  width: widget.maxWidth,
+                  height: widget.maxHeight,
+                  child: GestureDetector(
+                    onTapDown: (TapDownDetails details) {
+                      handleTap(details, true);
+                    },
+                    onTapCancel: () {
+                      setState(() {
+                        initializeBlockBorderColors();
+                        previousBlockIndex = null;
+                        previousInnerBlockIndex = null;
+                      });
+                    },
+                    child: Container(
+                      child: CustomPaint(
+                        painter: BarChartPainter(
+                          mood: widget.mood,
+                          date: widget.date,
+                          time: widget.time,
+                          categories: widget.categories,
+                          colors: widget.colors,
+                          barWidth: widget.barWidth,
+                          barSpacing: widget.barSpacing,
+                          borderRadius: widget.borderRadius,
+                          borderColor: widget.borderColor,
+                          borderWidth: widget.borderWidth,
+                          blockBorderColors: blockBorderColors,
+                          previousBlockIndex: previousBlockIndex,
+                          previousInnerBlockIndex: previousInnerBlockIndex,
+                        ),
+                      ),
+                    ),
+                  )
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: widget.maxHeight/30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                    widget.mood.length,
+                        (index) {
+                      if (index == 0) {
+                        return Container(
+                          child: Text(
+                              (index + 1).toString(),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Quicksand',
+                                  fontSize: fontSize*1.15
+                              )
+                          ),
+                        );
+                      } else {
+                        return Container(
+                          margin: EdgeInsets.only(left: widget.barWidth*1.48),
+                          child: Text(
+                              (index + 1).toString(),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Quicksand',
+                                  fontSize: fontSize*1.15
+                              )
+                          ),
+                        );
+                      }
+                    }
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
+
 
   void handleTap(TapDownDetails details, bool isPressed) {
     setState(() {
@@ -128,12 +366,12 @@ class StackedBarChartState extends State<StackedBarChart> {
       final totalWidth = totalBarsWidth + totalSpacing;
       final barStartPosition = (widget.maxWidth - totalWidth) / 2;
 
-      final maxTotalMoodChanges = widget.mood.values.map((e) => e.length).reduce((value, element) => value > element ? value : element);
+      final maxTotalMoodChanges = widget.mood.values.map((e) => e.length).reduce((value, element) => value > element? value : element);
       final blockHeight = widget.maxHeight / maxTotalMoodChanges;
 
       for (int blockIndex = 0; blockIndex < widget.mood.length; blockIndex++) {
-        final moodChanges = widget.mood[blockIndex] ?? [];
-        final startX = barStartPosition + (blockIndex * (widget.barWidth + widget.barSpacing));
+          final moodChanges = widget.mood[blockIndex]?? [];
+        final startX = barStartPosition + (blockIndex * (widget.barWidth + widget.barSpacing)) + (widget.barWidth * 0.75);
         final endX = startX + widget.barWidth;
 
         for (int innerBlockIndex = 0; innerBlockIndex < moodChanges.length; innerBlockIndex++) {
@@ -141,13 +379,15 @@ class StackedBarChartState extends State<StackedBarChart> {
           final endY = startY + blockHeight;
 
           if (tapPosition.dx >= startX && tapPosition.dx <= endX && tapPosition.dy >= startY && tapPosition.dy <= endY) {
-            if (previousBlockIndex != null && previousInnerBlockIndex != null) {
+            if (previousBlockIndex!= null && previousInnerBlockIndex!= null) {
               blockBorderColors[previousBlockIndex!][previousInnerBlockIndex!] = null;
             }
-            blockBorderColors[blockIndex][innerBlockIndex] = isPressed ? widget.colors[moodChanges[innerBlockIndex] - 1] : widget.borderColor;
+            blockBorderColors[blockIndex][innerBlockIndex] = isPressed? widget.colors[moodChanges[innerBlockIndex] - 1] : widget.borderColor;
             previousBlockIndex = blockIndex;
             previousInnerBlockIndex = innerBlockIndex;
-            if (widget.onTap != null) {
+            print(blockBorderColors);
+            print("Handling block tap at blockIndex: $blockIndex, innerBlockIndex: $innerBlockIndex");
+            if (widget.onTap!= null) {
               final moodValue = moodChanges[innerBlockIndex];
               final mood = getMood(moodValue);
               final date = getDate(blockIndex, innerBlockIndex);
@@ -156,6 +396,46 @@ class StackedBarChartState extends State<StackedBarChart> {
               widget.onTap!(mood, date, time, category);
             }
           }
+        }
+      }
+    });
+  }
+
+  void handleBlockTap(TapDownDetails details, bool isPressed) {
+    setState(() {
+      final RenderBox renderBox = context.findRenderObject() as RenderBox;
+      final tapPosition = renderBox.globalToLocal(details.globalPosition);
+
+      final maxTotalMoodChanges = widget.mood.values.map((e) => e.length).reduce((value, element) => value > element ? value : element);
+      final blockHeight = widget.maxHeight / maxTotalMoodChanges;
+
+      final maxInnerBlocks = widget.mood[widget.mood.length - 1]!.length;
+
+      final startX = ((widget.barWidth + (widget.mood.length - 1) * widget.barSpacing)) / 2;
+      final startY = widget.maxHeight - (maxInnerBlocks * blockHeight);
+
+      final relativePosition = Offset(tapPosition.dx - startX + scrollController.offset, tapPosition.dy - startY);
+
+      final blockIndex = ((relativePosition.dx - widget.barWidth / 2) / (widget.barWidth + widget.barSpacing)).floor();
+      final relativeY = widget.maxHeight - tapPosition.dy;
+      final innerBlockIndex = (relativeY / blockHeight).floor();
+
+      print("Handling block tap at blockIndex: $blockIndex, innerBlockIndex: $innerBlockIndex");
+
+      if (blockIndex >= 0 && blockIndex < blockBorderColors.length && innerBlockIndex >= 0 && innerBlockIndex < blockBorderColors[blockIndex].length) {
+        if (previousBlockIndex!= null && previousInnerBlockIndex!= null) {
+          blockBorderColors[previousBlockIndex!][previousInnerBlockIndex!] = null;
+        }
+        blockBorderColors[blockIndex][innerBlockIndex] = isPressed? widget.colors[widget.mood[blockIndex]![innerBlockIndex] - 1] : widget.borderColor;
+        previousBlockIndex = blockIndex;
+        previousInnerBlockIndex = innerBlockIndex;
+        if (widget.onTap!= null) {
+          final moodValue = widget.mood[blockIndex]?[innerBlockIndex];
+          final mood = getMood(moodValue!);
+          final date = getDate(blockIndex, innerBlockIndex);
+          final time = getTime(blockIndex, innerBlockIndex);
+          final category = getCategories(blockIndex, innerBlockIndex);
+          widget.onTap!(mood, date, time, category);
         }
       }
     });
@@ -204,7 +484,6 @@ class StackedBarChartState extends State<StackedBarChart> {
     }
     return '';
   }
-
 }
 
 class BarChartPainter extends CustomPainter {
@@ -270,13 +549,13 @@ class BarChartPainter extends CustomPainter {
 
         final maxTotalMoodChanges =
         mood.values.map((e) => e!.length).reduce((value, element) => value > element ? value : element);
-        final barHeight = size.height / maxTotalMoodChanges;
+        final blockHeight = size.height / maxTotalMoodChanges;
 
         Rect rect;
         if (totalMoodChanges == 1) {
           rect = Rect.fromLTRB(
             startX,
-            startY - barHeight,
+            startY - blockHeight,
             startX + barWidth,
             startY,
           );
@@ -292,7 +571,7 @@ class BarChartPainter extends CustomPainter {
         } else if (i == 0 && totalMoodChanges > 1) {
           rect = Rect.fromLTRB(
             startX,
-            startY - barHeight,
+            startY - blockHeight,
             startX + barWidth,
             startY,
           );
@@ -306,9 +585,9 @@ class BarChartPainter extends CustomPainter {
         } else if (i == totalMoodChanges - 1 && totalMoodChanges > 1) {
           rect = Rect.fromLTRB(
             startX,
-            startY - barHeight * (i + 1),
+            startY - blockHeight * (i + 1),
             startX + barWidth,
-            startY - barHeight * i,
+            startY - blockHeight * i,
           );
           final RRect rRect = RRect.fromRectAndCorners(
             rect,
@@ -320,9 +599,9 @@ class BarChartPainter extends CustomPainter {
         } else {
           rect = Rect.fromLTRB(
             startX,
-            startY - barHeight * (i + 1),
+            startY - blockHeight * (i + 1),
             startX + barWidth,
-            startY - barHeight * i,
+            startY - blockHeight * i,
           );
           canvas.drawRect(rect, paint);
           canvas.drawRect(rect, borderPaint);

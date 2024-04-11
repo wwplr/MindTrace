@@ -1,25 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mind_trace/main_page.dart';
 import 'package:provider/provider.dart';
 import 'add.dart';
 import 'firebase_options.dart';
 import 'notification.dart';
-import 'package:timezone/data/latest.dart' as tz;
 
 final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
 DateTime afternoonScheduledDateTime = DateTime(now.year, now.month, now.day, 14, 00);
 DateTime eveningScheduledDateTime = DateTime(now.year, now.month, now.day, 22, 00);
+FlutterBackgroundService flutterBackgroundService = FlutterBackgroundService();
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await flutterNotification.initialiseNotifications();
-
-  tz.initializeTimeZones();
 
   if (afternoonScheduledDateTime.isBefore(now)) {
     afternoonScheduledDateTime = afternoonScheduledDateTime.add(Duration(days: 1));
@@ -49,7 +48,6 @@ void main() async {
     ),
   );
 }
-
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);

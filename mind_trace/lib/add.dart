@@ -19,12 +19,14 @@ class TimerProvider extends ChangeNotifier {
   bool _isSubmitted = false;
   bool _start = true;
   bool _continued = false;
+  bool _sending = false;
   bool _isNotificationScheduled = false;
   bool get isSubmitted => _isSubmitted;
   bool get start => _start;
   bool get continued => _continued;
   Timer get timer => _timer;
   bool get isNotifiedScheduled => _isNotificationScheduled;
+  bool get sending => _sending;
 
   void setStart(bool value) {
     _start = value;
@@ -47,6 +49,11 @@ class TimerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSending(bool value) {
+    _sending = value;
+    notifyListeners();
+  }
+
   void stopTimer() {
     _timer.cancel();
     notifyListeners();
@@ -62,10 +69,15 @@ class Add extends StatefulWidget {
 
   @override
   State<Add> createState() => _AddState();
+
+  static Future<void> getSendToPython() async {
+    _AddState().sendToPython();
+  }
 }
 
 class _AddState extends State<Add> with WidgetsBindingObserver {
   final user = FirebaseAuth.instance.currentUser!;
+  late File file;
   String result = '';
   String categories = '';
   List<String> resultList = [];
@@ -93,6 +105,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   late SharedPreferences preferences;
   late DateTime lastUploaded;
   String lastUploadedText = '';
+  late String tsToPython;
 
   @override
   void initState() {
@@ -126,7 +139,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   }
 
   void saveLastUploaded(DateTime time) async {
-    lastUploadedText = DateFormat('EEEE, MMMM d \'at\' h:mm a').format(time);
+    lastUploadedText = DateFormat('E, MMMM d \'at\' h:mm a').format(time);
     await FirebaseFirestore.instance
         .collection('users')
         .doc('${user.uid}last_uploaded')
@@ -149,7 +162,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     print('App Lifecycle State: $state');
 
-    final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(seconds: 5));
+    final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(minutes: 20));
     if (Provider.of<TimerProvider>(context, listen: false).isNotifiedScheduled == false &&
         Provider.of<TimerProvider>(context, listen: false).isSubmitted == true &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
@@ -170,10 +183,9 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
-      File file = File(result.files.single.path!);
+      file = File(result.files.single.path!);
 
-      await fetchData(file, fontSize, width, height);
-
+      await fetchData(fontSize, width, height);
     } else {
       print("User canceled file picking");
     }
@@ -188,30 +200,30 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
             width: width*0.7,
             height: height*0.4,
             child: AlertDialog(
-              backgroundColor: Colors.white,
-              content: Text("File uploaded successfully.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Color(0xFF2A364E),
-                      fontSize: fontSize*1.45,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w600
+                backgroundColor: Colors.white,
+                content: Text("File uploaded successfully.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Color(0xFF2A364E),
+                        fontSize: fontSize*1.45,
+                        fontFamily: 'Quicksand',
+                        fontWeight: FontWeight.w500
+                    )
+                ),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)
+                ),
+                insetPadding: EdgeInsets.only(right: fontSize*3, left: fontSize*3),
+                actions: [
+                  Center(
+                      child: Icon(
+                        size: width*0.2,
+                        Icons.check_circle_outline_rounded,
+                        color: Colors.green,
+                      )
                   )
-              ),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
-              ),
-              insetPadding: EdgeInsets.only(right: fontSize*3, left: fontSize*3),
-              actions: [
-                Center(
-                   child: Icon(
-                     size: width*0.2,
-                     Icons.check_circle_outline_rounded,
-                     color: Colors.green,
-                   )
-                )
-              ]
-          )
+                ]
+            )
         );
       },
     );
@@ -236,7 +248,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> fetchData(File file, double fontSize, double width, double height) async {
+  Future<void> fetchData(double fontSize, double width, double height) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -246,13 +258,13 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
             height: height*0.4,
             child: AlertDialog(
                 backgroundColor: Colors.white,
-                content: Text("This may take a few minutes. You may leave the app, but do not terminate it.",
+                content: Text("This process may take a few minutes. Please do not leave the app.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         color: Color(0xFF2A364E),
                         fontSize: fontSize*1.45,
                         fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w600
+                        fontWeight: FontWeight.w500
                     )
                 ),
                 shape: RoundedRectangleBorder(
@@ -312,7 +324,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
             currentMoods.add(mood);
 
             if (category.isEmpty) {
-              await sendToPython(file, fontSize, timestamp);
+              tsToPython = timestamp;
+              await sendToPython();
               currentCategories.add(resultList);
 
               await FirebaseFirestore.instance
@@ -326,7 +339,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
               print('Fetched categories: $result');
               resultList = [];
             } else {
-              print(category);
               loopCompleted = true;
               updated = true;
             }
@@ -359,14 +371,15 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> sendToPython(File file, double fontSize, String timestamp) async {
-    String pythonScriptUrl = 'http://16.170.236.95:5000/';
+  Future<void> sendToPython() async {
+    Provider.of<TimerProvider>(context, listen: false).setSending(true);
 
+    String pythonScriptUrl = 'http://16.170.236.95:5000/';
+    print('Foreground running...');
     try {
-      // Create a multipart request
-      print('Timestamp sent: $timestamp');
+      print('Timestamp sent: $tsToPython');
       var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl))
-        ..fields['timestamp_r'] = timestamp
+        ..fields['timestamp_r'] = tsToPython
         ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
       // Send the request
@@ -379,13 +392,13 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           result = pythonResponse;
           resultList.add(result);
         });
+        Provider.of<TimerProvider>(context, listen: false).setSending(false);
       } else {
         print('Failed to communicate with Python server. Status code: ${response
             .statusCode}');
       }
     } catch (e) {
       print('Error sending file to Python server: $e');
-    } finally {
     }
   }
 
@@ -503,7 +516,20 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
               )
           ),
           Container(
-            margin: EdgeInsets.only(top: height*0.025, bottom:height*0.025),
+              margin: EdgeInsets.only(top: height*0.002),
+              child: Text(
+                  "Keep watching TikTok and\n return to log mood later.",
+                  style: TextStyle(
+                      fontFamily: 'Quicksand',
+                      fontWeight: FontWeight.w500,
+                      fontSize: fontSize,
+                      color: Colors.grey.shade700,
+                      height: 1
+                  )
+              )
+          ),
+          Container(
+            margin: EdgeInsets.only(top: height*0.02, bottom:height*0.025),
             child: Text(
               'OR',
               style: TextStyle(
@@ -867,219 +893,220 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
         child: Scaffold(
             body: SingleChildScrollView(
                 child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            margin: EdgeInsets.only(top: height*0.09),
-                            child: SizedBox(
-                              width: width * 0.8,
-                              height: height * 0.11,
-                              child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: Color(0xFFD9F6FF),
-                                      borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(width*0.08),
-                                          bottomRight: Radius.circular(width*0.08)
-                                      )
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        margin: EdgeInsets.only(left: width*0.04),
-                                        alignment: Alignment.topLeft,
-                                        child: RichText(
-                                            text: TextSpan(
-                                                style: TextStyle(
-                                                  letterSpacing: width*0.0006,
-                                                ),
-                                                children: [
-                                                  TextSpan(
-                                                    text: 'Hello,',
-                                                    style: TextStyle(
-                                                      fontSize: fontSize * 2.5,
-                                                      color: Colors.black,
-                                                      fontFamily: 'Quicksand',
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                  TextSpan(
-                                                      text: ' ${extractFirstName(username)}!',
-                                                      style: TextStyle(
-                                                        fontSize: fontSize * 2.5,
-                                                        color: Color(0xFF2A364E),
-                                                        fontFamily: 'PaytoneOne',
-                                                      )
-                                                  )
-                                                ]
-                                            )
-                                        ),
-                                      ),
-                                    Container(
-                                        margin: EdgeInsets.only(left: width*0.04),
-                                        alignment: Alignment.topLeft,
-                                        child: Text(
-                                            "It's reflecting time! What's on your mind?",
-                                            style: TextStyle(
-                                                fontFamily: 'Quicksand',
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: fontSize,
-                                                color: Colors.grey.shade700
-                                            )
-                                        )
-                                    ),
-                                      SizedBox(
-                                        height: height*0.01
-                                      )
-                                  ],
-                                )
-                            ),
-                          ),
-                        ),
-                          Container(
-                            alignment: Alignment.topLeft,
-                            margin: EdgeInsets.only(top: height*0.03, bottom: height*0.01, left: width*0.075),
-                            child: Text(
-                              'Log your mood',
-                              style: TextStyle(
-                                fontFamily: 'Quicksand',
-                                fontWeight: FontWeight.w500,
-                                fontSize: fontSize*1.2,
-                                color: Colors.grey.shade700
-                              )
-                            )
-                          ),
-                          Container(
-                            child: SizedBox(
-                              width: width * 0.85,
-                              height: height * 0.3,
-                              child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: Color(0xFFC9B4ED),
-                                      borderRadius: BorderRadius.all(Radius.circular(width*0.08))
-                                  ),
-                                  child: Provider.of<TimerProvider>(context).start ? moodBox2(context, fontSize, width, height) : moodBox(context, fontSize, width, height)
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.only(top: height*0.09),
+                        child: SizedBox(
+                          width: width * 0.8,
+                          height: height * 0.11,
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Color(0xFFD9F6FF),
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(width*0.08),
+                                      bottomRight: Radius.circular(width*0.08)
+                                  )
                               ),
-                            ),
-                          ),
-                          Container(
-                              alignment: Alignment.topLeft,
-                              margin: EdgeInsets.only(top: height*0.03, left: width*0.075),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
+                                    margin: EdgeInsets.only(left: width*0.04),
+                                    alignment: Alignment.topLeft,
+                                    child: RichText(
+                                        text: TextSpan(
+                                            style: TextStyle(
+                                              letterSpacing: width*0.0006,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: 'Hello,',
+                                                style: TextStyle(
+                                                  fontSize: fontSize * 2.5,
+                                                  color: Colors.black,
+                                                  fontFamily: 'Quicksand',
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                  text: ' ${extractFirstName(username)}!',
+                                                  style: TextStyle(
+                                                    fontSize: fontSize * 2.5,
+                                                    color: Color(0xFF2A364E),
+                                                    fontFamily: 'PaytoneOne',
+                                                  )
+                                              )
+                                            ]
+                                        )
+                                    ),
+                                  ),
+                                  Container(
+                                      margin: EdgeInsets.only(left: width*0.04),
+                                      alignment: Alignment.topLeft,
                                       child: Text(
-                                          'Upload TikTok browsing history',
+                                          "It's reflecting time! What's on your mind?",
                                           style: TextStyle(
                                               fontFamily: 'Quicksand',
                                               fontWeight: FontWeight.w500,
-                                              fontSize: fontSize*1.2,
+                                              fontSize: fontSize,
                                               color: Colors.grey.shade700
                                           )
                                       )
                                   ),
                                   SizedBox(
-                                      width: width*0.02
-                                  ),
-                                  Container(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          PageTransition(
-                                            type: PageTransitionType.fade,
-                                            child: TSlider(),
-                                          ),
-                                        );
-                                      },
-                                      child: Icon(
-                                        Icons.info,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(top: height*0.01),
-                            child: SizedBox(
-                              width: width * 0.85,
-                              height: height * 0.3,
-                              child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: Color(0xFFFFE0DB),
-                                      borderRadius: BorderRadius.all(Radius.circular(width*0.08))
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                          child: Column(
-                                            children: [
-                                              Container(
-                                                  margin: EdgeInsets.only(left: width*0.1, right: width*0.1),
-                                                  child: Text(
-                                                    "Tap the 'i' icon to see how to download your TikTok browsing history.",
-                                                  )
-                                              )
-                                            ],
-                                          )
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(top: height*0.03, bottom: height*0.03),
-                                        alignment: Alignment.center,
-                                        child: ElevatedButton (
-                                            onPressed: () async {
-                                              await pickFile(fontSize, width, height);
-                                            },
-                                            child: Text(
-                                                'Upload File',
-                                                style: TextStyle(
-                                                  fontFamily: "Quicksand",
-                                                  fontWeight: FontWeight.w600,
-                                                  letterSpacing: 0.5,
-                                                  color: Color(0xFF2A364E),
-                                                  fontSize: fontSize * 1.4,
-                                                )
-                                            ),
-                                            style: ElevatedButton.styleFrom(
-                                              fixedSize: Size(0.4 * width, 0.055 * height),
-                                              backgroundColor: Color(0xFFFFF8EA),
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(100)
-                                              ),
-                                              elevation: 2.0,
-                                            )
-                                        )
-                                      ),
-                                      Container(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                              'Last uploaded: $lastUploadedText',
-                                              style: TextStyle(
-                                                  fontFamily: 'Quicksand',
-                                                  fontSize: fontSize*1.1,
-                                                  color: Colors.grey.shade700
-                                              )
-                                          )
-                                      ),
-                                    ],
+                                      height: height*0.01
                                   )
+                                ],
+                              )
+                          ),
+                        ),
+                      ),
+                      Container(
+                          alignment: Alignment.topLeft,
+                          margin: EdgeInsets.only(top: height*0.03, bottom: height*0.01, left: width*0.075),
+                          child: Text(
+                              'Log your mood',
+                              style: TextStyle(
+                                  fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: fontSize*1.1,
+                                  color: Colors.grey.shade700
+                              )
+                          )
+                      ),
+                      Container(
+                        child: SizedBox(
+                          width: width * 0.85,
+                          height: height * 0.3,
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Color(0xFFC9B4ED),
+                                  borderRadius: BorderRadius.all(Radius.circular(width*0.08))
+                              ),
+                              child: Provider.of<TimerProvider>(context).start ? moodBox2(context, fontSize, width, height) : moodBox(context, fontSize, width, height)
+                          ),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.topLeft,
+                        margin: EdgeInsets.only(top: height*0.03, left: width*0.075),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                                child: Text(
+                                    'Upload TikTok browsing history',
+                                    style: TextStyle(
+                                        fontFamily: 'Quicksand',
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: fontSize*1.1,
+                                        color: Colors.grey.shade700
+                                    )
+                                )
+                            ),
+                            SizedBox(
+                                width: width*0.01
+                            ),
+                            Container(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.fade,
+                                      child: TSlider(),
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                    Icons.info,
+                                    color: Colors.grey.shade700,
+                                    size: width*0.05
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: height*0.01),
+                        child: SizedBox(
+                          width: width * 0.85,
+                          height: height * 0.3,
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Color(0xFFFFE0DB),
+                                  borderRadius: BorderRadius.all(Radius.circular(width*0.08))
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                              margin: EdgeInsets.only(left: width*0.1, right: width*0.1),
+                                              child: Text(
+                                                "Tap the 'i' icon to see how to download your TikTok browsing history.",
+                                              )
+                                          )
+                                        ],
+                                      )
+                                  ),
+                                  Container(
+                                      margin: EdgeInsets.only(top: height*0.03, bottom: height*0.03),
+                                      alignment: Alignment.center,
+                                      child: ElevatedButton (
+                                          onPressed: () async {
+                                            await pickFile(fontSize, width, height);
+                                          },
+                                          child: Text(
+                                              'Upload File',
+                                              style: TextStyle(
+                                                fontFamily: "Quicksand",
+                                                fontWeight: FontWeight.w600,
+                                                letterSpacing: 0.5,
+                                                color: Color(0xFF2A364E),
+                                                fontSize: fontSize * 1.4,
+                                              )
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            fixedSize: Size(0.4 * width, 0.055 * height),
+                                            backgroundColor: Color(0xFFFFF8EA),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(100)
+                                            ),
+                                            elevation: 2.0,
+                                          )
+                                      )
+                                  ),
+                                  Container(
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                          'Last uploaded: $lastUploadedText',
+                                          style: TextStyle(
+                                              fontFamily: 'Quicksand',
+                                              fontSize: fontSize*1.1,
+                                              color: Colors.grey.shade700
+                                          )
+                                      )
+                                  ),
+                                ],
+                              )
                           ),
-                          SizedBox(
-                            width: width,
-                            height: height*0.15
-                          )
-                        ]
+                        ),
+                      ),
+                      SizedBox(
+                          width: width,
+                          height: height*0.15
+                      )
+                    ]
                 )
             )
         )

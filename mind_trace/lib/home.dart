@@ -18,6 +18,7 @@ class _HomeState extends State<Home> {
   String dateText = '';
   String timeText = '';
   String categoriesText = '';
+  String generate = 'Click generate to view your mood insights.';
   Map<int, List<int>> moodList = {};
   Map<int, List<String>> dateList = {};
   Map<int, List<String>> timeList = {};
@@ -248,6 +249,7 @@ class _HomeState extends State<Home> {
                                 noCategory = false;
                                 noData = false;
                                 barPressed = false;
+                                generate = 'Sessions';
                               });
                               await fetchData(convertTimestamp(date.toString()));
                             },
@@ -319,8 +321,8 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       buildLegend(
-                        text: 'High',
-                        color: Colors.green,
+                        text: 'Low',
+                        color: Colors.red,
                         space: 0.01 * width,
                         fontSize: fontSize * 1.5,
                         width: 0.02 * width,
@@ -337,8 +339,8 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(width: 0.05 * width),
                       buildLegend(
-                        text: 'Low',
-                        color: Colors.red,
+                        text: 'High',
+                        color: Colors.green,
                         space: 0.01 * width,
                         fontSize: fontSize * 1.5,
                         width: 0.02 * width,
@@ -351,36 +353,53 @@ class _HomeState extends State<Home> {
                   child: Text(
                     noDataText,
                     style: TextStyle(
-                        color: Colors.black
+                        color: Colors.black,
+                        fontFamily: 'Quicksand',
+                        fontSize: fontSize*1.15
                     ),
                   ),
                 ) : Container(
-                  child: StackedBarChart(
-                      mood: moodList,
-                      date: dateList,
-                      time: timeList,
-                      categories: categoryList,
-                      colors: [
-                        Colors.red,
-                        Colors.yellow.shade600,
-                        Colors.green,
-                      ],
-                      barWidth: width*0.065,
-                      maxHeight: height*0.3,
-                      maxWidth: width*0.9,
-                      barSpacing: width*0.05,
-                      borderRadius: width*0.047,
-                      borderColor: Colors.white,
-                      borderWidth: width*0.0025,
-                      onTap: (m, d, t, c) {
-                        setState(() {
-                          moodText = m;
-                          dateText = d;
-                          timeText = t;
-                          categoriesText = c.toString();
-                          barPressed = true;
-                        });
-                      }
+                  child: Column(
+                    children: [
+                      StackedBarChart(
+                          mood: moodList,
+                          date: dateList,
+                          time: timeList,
+                          categories: categoryList,
+                          colors: [
+                            Colors.red,
+                            Colors.yellow.shade600,
+                            Colors.green,
+                          ],
+                          barWidth: width*0.065,
+                          maxHeight: height*0.3,
+                          maxWidth: width*0.9,
+                          barSpacing: width*0.05,
+                          borderRadius: width*0.047,
+                          borderColor: Colors.white,
+                          borderWidth: width*0.0025,
+                          onTap: (m, d, t, c) {
+                            setState(() {
+                              moodText = m;
+                              dateText = d;
+                              timeText = t;
+                              categoriesText = c.toString();
+                              barPressed = true;
+                            });
+                          }
+                      ),
+                      Container(
+                          margin: EdgeInsets.only(top: height*0.01),
+                          child: Text(
+                            generate,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Quicksand',
+                                fontSize: fontSize*1.15
+                            ),
+                          )
+                      )
+                    ],
                   ),
                 ),
                 Container(
