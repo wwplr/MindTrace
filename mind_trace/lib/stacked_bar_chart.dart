@@ -105,6 +105,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w500,
                               fontSize: fontSize*1.15
                           )
                       ),
@@ -116,6 +117,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w500,
                               fontSize: fontSize*1.15
                           )
                       ),
@@ -128,6 +130,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w500,
                               fontSize: fontSize*1.15
                           )
                       ),
@@ -198,6 +201,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontFamily: 'Quicksand',
+                                        fontWeight: FontWeight.w500,
                                         fontSize: fontSize*1.15
                                     )
                                 ),
@@ -210,6 +214,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontFamily: 'Quicksand',
+                                        fontWeight: FontWeight.w500,
                                         fontSize: fontSize*1.15
                                     )
                                 ),
@@ -241,6 +246,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w500,
                               fontSize: fontSize*1.15
                           )
                       ),
@@ -252,6 +258,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w500,
                               fontSize: fontSize*1.15
                           )
                       ),
@@ -264,6 +271,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w500,
                               fontSize: fontSize*1.15
                           )
                       ),
@@ -328,6 +336,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                               style: TextStyle(
                                   color: Colors.black,
                                   fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w500,
                                   fontSize: fontSize*1.15
                               )
                           ),
@@ -340,6 +349,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                               style: TextStyle(
                                   color: Colors.black,
                                   fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w500,
                                   fontSize: fontSize*1.15
                               )
                           ),

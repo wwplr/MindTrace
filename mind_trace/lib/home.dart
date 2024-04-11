@@ -28,6 +28,7 @@ class _HomeState extends State<Home> {
   bool noData = false;
   bool noCategory = false;
   bool barPressed = false;
+  bool selectedDate = false;
 
   @override
   void initState() {
@@ -131,9 +132,9 @@ class _HomeState extends State<Home> {
               currentTime.add(time);
               if (category.isEmpty) {
                 noCategory = true;
-                print('No categories found, please upload your browsing history.');
-                noDataText = 'No categories found, please upload your browsing history.';
-                currentCategories.add('No categories found, please upload your browsing history.');
+                print('No categories found, please upload your TikTok browsing history.');
+                noDataText = 'No categories found, please upload your TikTok browsing history.';
+                currentCategories.add('No categories found, please upload your TikTok browsing history.');
               } else {
                 currentCategories.add('[$category]');
               }
@@ -250,6 +251,7 @@ class _HomeState extends State<Home> {
                                 noData = false;
                                 barPressed = false;
                                 generate = 'Sessions';
+                                selectedDate = true;
                               });
                               await fetchData(convertTimestamp(date.toString()));
                             },
@@ -395,6 +397,7 @@ class _HomeState extends State<Home> {
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Quicksand',
+                                fontWeight: FontWeight.w500,
                                 fontSize: fontSize*1.15
                             ),
                           )
@@ -402,8 +405,24 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                 ),
+                (selectedDate == true && noData == false) ? Container(
+                    alignment: Alignment.topLeft,
+                    margin: EdgeInsets.only(top: height*0.02, bottom: height*0.01, left: width*0.075),
+                    child: Text(
+                        'Tap each block for more information',
+                        style: TextStyle(
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w500,
+                            fontSize: fontSize*1.1,
+                            color: Colors.grey.shade700,
+                          height: 1.05
+                        )
+                    )
+                ) : Container(
+                  margin: EdgeInsets.only(top: height*0.02)
+                ),
                 Container(
-                  margin: EdgeInsets.only(top: height * 0.02),
+                  margin: EdgeInsets.only(),
                   child: SizedBox(
                     width: width * 0.85,
                     height: height * 0.21,
@@ -530,7 +549,7 @@ class _HomeState extends State<Home> {
                                         fontWeight: FontWeight.normal,
                                         color: Colors.white
                                     ),
-                                    message: 'Go to the + page and follow the instructions.',
+                                    message: 'Navigate to the + page and follow the instructions.',
                                     child: Icon(
                                       Icons.info,
                                       color: Colors.black,
