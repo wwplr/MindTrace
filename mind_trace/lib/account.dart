@@ -41,7 +41,7 @@ class _AccountState extends State<Account> {
                           Container(
                             width: width,
                             height: 0.3 * height,
-                            margin: EdgeInsets.only(bottom: (0.3 * height)),
+                            margin: EdgeInsets.only(bottom: 0.3 * height),
                             decoration: BoxDecoration(
                                 color: Color(0xFFC6F2FF),
                                 borderRadius: BorderRadius.only(
@@ -51,8 +51,7 @@ class _AccountState extends State<Account> {
                             ),
                             child: Container(
                                 alignment: Alignment.topLeft,
-                                margin: EdgeInsets.only(top: (0.12 * height),
-                                    left: (0.15 * width)),
+                                margin: EdgeInsets.only(top: 0.12 * height, left: 0.075 * width),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
@@ -61,10 +60,9 @@ class _AccountState extends State<Account> {
                                         textAlign: TextAlign.left,
                                         style: TextStyle(
                                             fontFamily: "Montserrat",
-                                            fontSize: fontSize * 2.75,
+                                            fontSize: fontSize * 2.5,
                                             fontWeight: FontWeight.bold,
                                             fontStyle: FontStyle.normal,
-                                            height: 1.2,
                                             letterSpacing: 0.5,
                                             color: Color(0xFF2A364E)
                                         )
@@ -74,6 +72,7 @@ class _AccountState extends State<Account> {
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
                                           fontFamily: "Quicksand",
+                                          fontSize: fontSize * 1.15,
                                           fontWeight: FontWeight.w600,
                                           fontStyle: FontStyle.normal,
                                           letterSpacing: 0.5,

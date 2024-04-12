@@ -5,9 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:mind_trace/stacked_bar_chart.dart';
+import 'package:mind_trace/word_cloud.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -18,6 +21,7 @@ class _HomeState extends State<Home> {
   String dateText = '';
   String timeText = '';
   String categoriesText = '';
+  String selectedValue = '';
   String generate = 'Click generate to view your mood insights.';
   Map<int, List<int>> moodList = {};
   Map<int, List<String>> dateList = {};
@@ -29,6 +33,9 @@ class _HomeState extends State<Home> {
   bool noCategory = false;
   bool barPressed = false;
   bool selectedDate = false;
+  Map<String, dynamic> wordCloud = {};
+  List<Map<String, dynamic>> wordClouds = [];
+  List<String> categories = [];
 
   @override
   void initState() {
@@ -37,6 +44,20 @@ class _HomeState extends State<Home> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    loadCategories();
+  }
+
+  Future<void> loadCategories() async {
+    List<String> retrievedCategories = await extractCategories();
+    Map calculatedWordCloud = calculateWordFrequencies(retrievedCategories);
+
+    calculatedWordCloud.forEach((word, value) {
+      wordClouds.add({'word': word, 'value': value});
+    });
+
+    setState(() {
+      categories = retrievedCategories;
+    });
   }
 
   String convertDate(String timestamp) {
@@ -290,6 +311,66 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future<List<String>> extractCategories() async {
+    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+
+    List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<
+        String,
+        dynamic>).entries.map((entry) =>
+    {
+      'timestamp': entry.key,
+      'moods': entry.value[0],
+      'categories': entry.value[1]
+    }).toList();
+
+    if (documentSnapshot.exists) {
+      if (data.isNotEmpty) { // Check if the collection is not empty before accessing elements
+        data.forEach((entry) {
+          String mood = entry['moods'];
+          String category = entry['categories'];
+
+          if (mood != 'Start' && mood != 'Finish' && category != '') {
+            List<String> separatedCategories = category
+                .split(',')
+                .map((category) => category.trim().toLowerCase()).toList();
+            List<String> finalCategories = removePluralSuffix(separatedCategories);
+            categories.addAll(finalCategories);
+          }
+        });
+      } else {
+        print('Data is empty.'); // Handle the case where the collection is empty
+      }
+    } else {
+      print('User document does not exist.');
+    }
+    return categories;
+  }
+
+  List<String> removePluralSuffix(List<String> categories) {
+    List<String> updatedCategories = [];
+
+    categories.forEach((category) {
+      if (category.endsWith('s')) {
+        updatedCategories.add(category.substring(0, category.length - 1));
+      } else {
+        updatedCategories.add(category);
+      }
+    });
+
+    return updatedCategories;
+  }
+
+  Map<String, dynamic> calculateWordFrequencies(List<String> categories) {
+    for (String category in categories) {
+      wordCloud[category] = (wordCloud[category] ?? 0) + 1;
+    }
+    return wordCloud;
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -308,7 +389,7 @@ class _HomeState extends State<Home> {
                 Container(
                   margin: EdgeInsets.only(top: height*0.1),
                   child: Text(
-                    'Mood Progression',
+                    'Mood Insights',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: fontSize * 2,
@@ -572,7 +653,7 @@ class _HomeState extends State<Home> {
                         },
                         style: ElevatedButton.styleFrom(
                           fixedSize: Size((0.35*width), (0.055*height)),
-                          backgroundColor: Color(0xFFA986E4),
+                          backgroundColor: Color(0xFF49688D),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(width*0.055)
                           ),
@@ -590,6 +671,87 @@ class _HomeState extends State<Home> {
                         )
                     )
                 ),
+                Container(
+                    alignment: Alignment.topLeft,
+                    margin: EdgeInsets.only(top: height*0.03, bottom: height*0.01, left: width*0.075),
+                    child: Text(
+                        'TikTok Category WordCloud',
+                        style: TextStyle(
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w500,
+                            fontSize: fontSize*1.1,
+                            color: Colors.grey.shade700,
+                            height: 1.05
+                        )
+                    )
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: width*0.05),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF9ECFF),
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.symmetric(vertical: height * 0.02),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(right: width * 0.01),
+                                child: Tooltip(
+                                  showDuration: Duration(seconds: 5),
+                                  triggerMode: TooltipTriggerMode.tap,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade700,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  textStyle: TextStyle(
+                                    fontFamily: 'Quicksand',
+                                    fontSize: fontSize * 1.2,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.white,
+                                  ),
+                                  message: 'Tap on a word to view its count.',
+                                  child: Icon(
+                                    Icons.info,
+                                    color: Colors.black,
+                                    size: width * 0.045,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                'Count: $selectedValue',
+                                style: TextStyle(
+                                  fontFamily: 'Quicksand',
+                                  fontSize: fontSize * 1.4,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(bottom: height*0.02, right: width*0.03, left: width*0.03),
+                          alignment: Alignment.center,
+                          child: WordCloud(
+                            wordList: wordClouds,
+                            onWordTap: (value) {
+                              setState(() {
+                                selectedValue = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
                 SizedBox(
                     width: width,
                     height: height*0.15

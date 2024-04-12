@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mind_trace/main_page.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,6 @@ final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
 DateTime afternoonScheduledDateTime = DateTime(now.year, now.month, now.day, 14, 00);
 DateTime eveningScheduledDateTime = DateTime(now.year, now.month, now.day, 22, 00);
-FlutterBackgroundService flutterBackgroundService = FlutterBackgroundService();
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();

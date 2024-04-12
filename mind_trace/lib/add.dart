@@ -69,10 +69,6 @@ class Add extends StatefulWidget {
 
   @override
   State<Add> createState() => _AddState();
-
-  static Future<void> getSendToPython() async {
-    _AddState().sendToPython();
-  }
 }
 
 class _AddState extends State<Add> with WidgetsBindingObserver {

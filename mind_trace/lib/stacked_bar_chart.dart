@@ -421,7 +421,7 @@ class StackedBarChartState extends State<StackedBarChart> {
 
       final maxInnerBlocks = widget.mood[widget.mood.length - 1]!.length;
 
-      final startX = ((widget.barWidth + (widget.mood.length - 1) * widget.barSpacing)) / 2;
+      final startX = ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2;
       final startY = widget.maxHeight - (maxInnerBlocks * blockHeight);
 
       final relativePosition = Offset(tapPosition.dx - startX + scrollController.offset, tapPosition.dy - startY);
@@ -549,12 +549,12 @@ class BarChartPainter extends CustomPainter {
           borderPaint
             ..style = PaintingStyle.stroke
             ..color = blockBorderColors[day][i] ?? borderColor
-            ..strokeWidth = blockBorderColors[day][i] != null ? borderWidth * 3 : borderWidth;
+            ..strokeWidth = borderWidth * 1.5;
         } else {
           borderPaint
             ..style = PaintingStyle.stroke
             ..color = borderColor
-            ..strokeWidth = borderWidth;
+            ..strokeWidth = borderWidth * 1.5;
         }
 
         final maxTotalMoodChanges =
