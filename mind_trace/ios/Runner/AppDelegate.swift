@@ -1,8 +1,6 @@
 import UIKit
-import BackgroundTasks
 import Flutter
 import MobileCoreServices
-import flutter_background_service_ios
 import Foundation
 
 @UIApplicationMain

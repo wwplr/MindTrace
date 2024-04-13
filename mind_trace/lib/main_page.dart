@@ -4,24 +4,19 @@ import 'package:mind_trace/login.dart';
 import 'home_page.dart';
 
 class MainPage extends StatelessWidget {
-  const MainPage({super.key});
+  const MainPage({Key? key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          // user is logged in
-          if (snapshot.hasData) {
-            return const HomePage();
-          }
-          // user is NOT logged in
-          else {
-            return const Login();
-          }
-        },
-      ),
+    return StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return const HomePage();
+            } else {
+              return const Login();
+            }
+          },
     );
   }
 }

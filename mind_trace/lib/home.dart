@@ -184,6 +184,14 @@ class _HomeState extends State<Home> {
           categoryList = newCategories;
         });
       } else {
+        setState(() {
+          noData = true;
+          noDataText = 'No data found for the selected date.';
+          moodText = 'No data logged';
+          dateText = 'No data logged';
+          timeText = 'No data logged';
+          categoriesText = 'No data logged';
+        });
         print('User document does not exist.');
       }
     } catch (error) {
@@ -317,18 +325,17 @@ class _HomeState extends State<Home> {
         .doc(user.uid)
         .get();
 
-
-    List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<
-        String,
-        dynamic>).entries.map((entry) =>
-    {
-      'timestamp': entry.key,
-      'moods': entry.value[0],
-      'categories': entry.value[1]
-    }).toList();
-
     if (documentSnapshot.exists) {
-      if (data.isNotEmpty) { // Check if the collection is not empty before accessing elements
+      List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<
+          String,
+          dynamic>).entries.map((entry) =>
+      {
+        'timestamp': entry.key,
+        'moods': entry.value[0],
+        'categories': entry.value[1]
+      }).toList();
+
+      if (data.isNotEmpty) {
         data.forEach((entry) {
           String mood = entry['moods'];
           String category = entry['categories'];
@@ -342,10 +349,10 @@ class _HomeState extends State<Home> {
           }
         });
       } else {
-        print('Data is empty.'); // Handle the case where the collection is empty
+        print('Data is empty.');
       }
     } else {
-      print('User document does not exist.');
+      print('There is no data.');
     }
     return categories;
   }
@@ -751,7 +758,6 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                 ),
-
                 SizedBox(
                     width: width,
                     height: height*0.15

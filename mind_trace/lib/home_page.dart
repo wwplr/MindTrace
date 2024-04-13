@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final user = FirebaseAuth.instance.currentUser!;
+  final user = FirebaseAuth.instance.currentUser;
   int selectedIndex = 1;
 
   @override
@@ -52,9 +52,7 @@ class _HomePageState extends State<HomePage> {
 
     return PopScope(
         canPop: false,
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Stack(
+        child: Stack(
               children: [
                 pages[selectedIndex],
                 Align(
@@ -87,7 +85,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
-            )
         )
     );
   }

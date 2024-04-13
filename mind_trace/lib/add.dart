@@ -97,11 +97,12 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   bool updated = false;
   bool done = false;
   final flutterNotification = FlutterNotification();
-  final String username = FirebaseAuth.instance.currentUser!.displayName!;
   late SharedPreferences preferences;
   late DateTime lastUploaded;
   String lastUploadedText = '';
   late String tsToPython;
+  String username = '';
+  String uploadText = '';
 
   @override
   void initState() {
@@ -110,6 +111,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    final currentUser = FirebaseAuth.instance.currentUser;
+    username = currentUser != null ? currentUser.displayName ?? '' : '';
     WidgetsBinding.instance.addObserver(this);
     loadLastUploaded();
   }
@@ -197,7 +200,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
             height: height*0.4,
             child: AlertDialog(
                 backgroundColor: Colors.white,
-                content: Text("File uploaded successfully.",
+                content: Text(
+                    uploadText,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         color: Color(0xFF2A364E),
@@ -298,69 +302,81 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           'categories': entry.value[1]
         }).toList();
 
-        List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
-
-        for (String timestamp in sortedTimestamps) {
-          var entry = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp);
-
-          String mood = entry['moods'];
-          String category = entry['categories'];
-
-          if (mood == 'Start') {
-            currentTimestamps = [];
-            currentCategories = [];
-            currentMoods = [];
-          } else if (mood == 'Finish') {
-            newTimestamps[setIndex] = currentTimestamps;
-            newCategories[setIndex] = currentCategories;
-            newMoods[setIndex] = currentMoods;
-            setIndex++;
-          } else {
-            currentTimestamps.add(timestamp);
-            currentMoods.add(mood);
-
-            if (category.isEmpty) {
-              tsToPython = timestamp;
-              await sendToPython();
-              currentCategories.add(resultList);
-
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid.toString())
-                  .update({
-                timestamp: [mood, result],
-              });
-              updated = true;
-
-              print('Fetched categories: $result');
-              resultList = [];
-            } else {
-              loopCompleted = true;
-              updated = true;
-            }
-          }
-        };
-
-        if (sortedTimestamps.length - (2 * setIndex) == currentCategories.length) {
-          loopCompleted = true;
-        }
-
-        if (loopCompleted && updated) {
-          setState(() {
-            timestampList = newTimestamps;
-            moodList = newMoods;
-            categoryList = newCategories;
-            loopCompleted = false;
-            updated = false;
-          });
+        if (data.isEmpty) {
+          await Future.delayed(Duration(seconds: 2));
           Navigator.pop(context);
-          await checkIcon(fontSize, width, height);
-          print('All timestamps: $timestampList');
-          print('All categories: $categoryList');
+          popup('Please log your mood before uploading.');
+          print('Delay');
+        } else {
+          List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
+
+          for (String timestamp in sortedTimestamps) {
+            var entry = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp);
+
+            String mood = entry['moods'];
+            String category = entry['categories'];
+
+            if (mood == 'Start') {
+              currentTimestamps = [];
+              currentCategories = [];
+              currentMoods = [];
+            } else if (mood == 'Finish') {
+              newTimestamps[setIndex] = currentTimestamps;
+              newCategories[setIndex] = currentCategories;
+              newMoods[setIndex] = currentMoods;
+              setIndex++;
+            } else {
+              currentTimestamps.add(timestamp);
+              currentMoods.add(mood);
+
+              if (category.isEmpty) {
+                tsToPython = timestamp;
+                await sendToPython();
+                currentCategories.add(resultList);
+
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid.toString())
+                    .update({
+                  timestamp: [mood, result],
+                });
+                updated = true;
+                uploadText = "File uploaded successfully.";
+
+                print('Fetched categories: $result');
+                resultList = [];
+              } else {
+                loopCompleted = true;
+                updated = true;
+                await Future.delayed(Duration(seconds: 2));
+                uploadText = "The data is already up to date.";
+              }
+            }
+          };
+
+          if (sortedTimestamps.length - (2 * setIndex) == currentCategories.length) {
+            loopCompleted = true;
+          }
+
+          if (loopCompleted && updated) {
+            setState(() {
+              timestampList = newTimestamps;
+              moodList = newMoods;
+              categoryList = newCategories;
+              loopCompleted = false;
+              updated = false;
+            });
+            Navigator.pop(context);
+            await checkIcon(fontSize, width, height);
+            print('All timestamps: $timestampList');
+            print('All categories: $categoryList');
+          }
         }
       } else {
-        Navigator.pop(context);
         print('User document does not exist.');
+        Navigator.pop(context);
+        await Future.delayed(Duration(seconds: 2));
+        popup('Please log your mood before uploading.');
       }
     } catch (error) {
       print('Error fetching data: $error');
@@ -371,7 +387,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     Provider.of<TimerProvider>(context, listen: false).setSending(true);
 
     String pythonScriptUrl = 'http://16.170.236.95:5000/';
-    print('Foreground running...');
     try {
       print('Timestamp sent: $tsToPython');
       var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl))
@@ -409,7 +424,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     return formattedDateTime;
   }
 
-  void popup() {
+  void popup(String message) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.04;
@@ -421,18 +436,19 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           return AlertDialog(
               backgroundColor: Colors.white,
               content: Text(
-                'Please select an option.',
+                message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF2A364E),
                   fontSize: fontSize,
                   fontFamily: 'Quicksand',
+                  fontWeight: FontWeight.w500
                 ),
               ),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
+                  borderRadius: BorderRadius.circular(width*0.047)
               ),
-              insetPadding: EdgeInsets.only(right: (0.1*width), left: (0.1*width)),
+              insetPadding: EdgeInsets.only(right: (0.15*width), left: (0.15*width)),
               actions: [
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -456,7 +472,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                   style: TextStyle(
                                       color: Color(0xFF2A364E),
                                       fontSize: fontSize,
-                                      fontWeight: FontWeight.w400
+                                      fontWeight: FontWeight.normal
                                   )
                               )
                           )
@@ -757,7 +773,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                         Provider.of<TimerProvider>(context, listen: false).setNotification(false);
                       });
                     } else {
-                      popup();
+                      popup('Please select an option.');
                     }
                   },
                   child: Text(
@@ -889,16 +905,13 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
         child: Scaffold(
             body: SingleChildScrollView(
                 child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Container(
                         alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.only(top: height*0.09),
-                        child: SizedBox(
-                          width: width * 0.8,
-                          height: height * 0.11,
-                          child: DecoratedBox(
+                        margin: EdgeInsets.only(top: height*0.09, right: width * 0.2),
+                        child: DecoratedBox(
                               decoration: BoxDecoration(
                                   color: Color(0xFFD9F6FF),
                                   borderRadius: BorderRadius.only(
@@ -907,44 +920,50 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                   )
                               ),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  SizedBox(
+                                      height: height*0.0125
+                                  ),
                                   Container(
-                                    margin: EdgeInsets.only(left: width*0.04),
+                                    margin: EdgeInsets.symmetric(horizontal: width*0.04),
                                     alignment: Alignment.topLeft,
-                                    child: RichText(
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: RichText(
                                         text: TextSpan(
-                                            style: TextStyle(
-                                              letterSpacing: width*0.0006,
-                                            ),
-                                            children: [
-                                              TextSpan(
-                                                text: 'Hello,',
-                                                style: TextStyle(
-                                                  fontSize: fontSize * 2.5,
-                                                  color: Colors.black,
-                                                  fontFamily: 'Quicksand',
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                          style: TextStyle(
+                                            letterSpacing: width*0.0006,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: 'Hello,',
+                                              style: TextStyle(
+                                                fontSize: fontSize * 2.5,
+                                                color: Colors.black,
+                                                fontFamily: 'Quicksand',
+                                                fontWeight: FontWeight.w600,
                                               ),
-                                              TextSpan(
-                                                  text: ' ${extractFirstName(username)}!',
-                                                  style: TextStyle(
-                                                    fontSize: fontSize * 2.5,
-                                                    color: Color(0xFF2A364E),
-                                                    fontFamily: 'PaytoneOne',
-                                                  )
-                                              )
-                                            ]
-                                        )
+                                            ),
+                                            TextSpan(
+                                              text: ' ${extractFirstName(username)}!',
+                                              style: TextStyle(
+                                                fontSize: fontSize * 2.5,
+                                                color: Color(0xFF2A364E),
+                                                fontFamily: 'PaytoneOne',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   Container(
                                       margin: EdgeInsets.only(left: width*0.04),
                                       alignment: Alignment.topLeft,
                                       child: Text(
-                                          "It's reflecting time! What's on your mind?",
+                                          "Time to track your mood!",
                                           style: TextStyle(
                                               fontFamily: 'Quicksand',
                                               fontWeight: FontWeight.w500,
@@ -954,10 +973,9 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                                       )
                                   ),
                                   SizedBox(
-                                      height: height*0.01
+                                      height: height*0.02
                                   )
                                 ],
-                              )
                           ),
                         ),
                       ),

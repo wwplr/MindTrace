@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photo_view/photo_view.dart';
 
 class TSlider extends StatefulWidget {
   const TSlider({Key? key}) : super(key: key);
@@ -13,6 +14,21 @@ class _TSliderState extends State<TSlider> {
   final CarouselController carouselController = CarouselController();
   int current = 0;
   String description = 'Go to your profile page on TikTok and click on the menu bar on the top right corner.';
+
+  final List<String> imgList = [
+    'assets/images/1.png',
+    'assets/images/2.png',
+    'assets/images/3.png',
+    'assets/images/4.png',
+    'assets/images/5.png',
+    'assets/images/6.png',
+    'assets/images/7.png',
+    'assets/images/8.png',
+    'assets/images/9.png',
+    'assets/images/10.png',
+    'assets/images/11.png',
+    'assets/images/12.png'
+  ];
 
   @override
   void initState() {
@@ -57,13 +73,14 @@ class _TSliderState extends State<TSlider> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.03;
+    double _currentScale = 1.0;
 
     return PopScope(
         canPop: false,
         child: Center(
             child: SizedBox(
                 width: width*0.85,
-                height: height*0.71,
+                height: height*0.75,
                 child: DecoratedBox(
                     decoration: BoxDecoration(
                         color: Color(0xFFFFF8EA),
@@ -83,18 +100,43 @@ class _TSliderState extends State<TSlider> {
                                 ),
                               ),
                               CarouselSlider(
-                                items: imageSliders,
+                                items: imgList.map((item) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return GestureDetector(
+                                        onScaleUpdate: (details) {
+                                          double scale = details.scale;
+                                          double newScale = scale;
+                                          setState(() {
+                                            _currentScale = newScale;
+                                          });
+                                        },
+                                        child: PhotoView(
+                                          imageProvider: AssetImage(item),
+                                          minScale: PhotoViewComputedScale.contained,
+                                          maxScale: PhotoViewComputedScale.covered * 2.0,
+                                          scaleStateController: PhotoViewScaleStateController(),
+                                          backgroundDecoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                          ),
+                                          initialScale: PhotoViewComputedScale.contained,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
                                 carouselController: carouselController,
                                 options: CarouselOptions(
-                                    height: height*0.5,
-                                    autoPlay: false,
-                                    enlargeCenterPage: true,
-                                    onPageChanged: (index, reason) {
-                                      setState(() {
-                                        current = index;
-                                        changeDescription(index);
-                                      });
-                                    }),
+                                  height: height * 0.55,
+                                  autoPlay: false,
+                                  enlargeCenterPage: true,
+                                  onPageChanged: (index, reason) {
+                                    setState(() {
+                                      current = index;
+                                      changeDescription(index);
+                                    });
+                                  },
+                                ),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -138,34 +180,3 @@ class _TSliderState extends State<TSlider> {
     );
   }
 }
-
-final List<String> imgList = [
-  'assets/images/1.png',
-  'assets/images/2.png',
-  'assets/images/3.png',
-  'assets/images/4.png',
-  'assets/images/5.png',
-  'assets/images/6.png',
-  'assets/images/7.png',
-  'assets/images/8.png',
-  'assets/images/9.png',
-  'assets/images/10.png',
-  'assets/images/11.png',
-  'assets/images/12.png'
-];
-
-final List<Widget> imageSliders = imgList.map((item) => Container(
-  child: Container(
-    margin: EdgeInsets.all(5.0),
-    child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-        child: Stack(
-          children: <Widget>[
-            Image.asset(
-              item,
-              fit: BoxFit.cover,
-            ),
-          ],
-        )),
-  ),
-)).toList();

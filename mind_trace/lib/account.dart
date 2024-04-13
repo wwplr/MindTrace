@@ -51,7 +51,7 @@ class _AccountState extends State<Account> {
                             ),
                             child: Container(
                                 alignment: Alignment.topLeft,
-                                margin: EdgeInsets.only(top: 0.12 * height, left: 0.075 * width),
+                                margin: EdgeInsets.only(top: 0.12 * height, left: 0.075 * width, right: 0.2 * width),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,6 +25,11 @@ class _SignUpState extends State<SignUp> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordController2 = TextEditingController();
+
+  bool isEmailVerified = false;
+
+  String text = '';
+  String text2 = '';
 
   void checkValidation() async {
     await showDialog(
@@ -126,14 +132,48 @@ class _SignUpState extends State<SignUp> {
   }
 
   void signup() async {
+    double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.04;
+    text = 'Verify your email';
+    text2 = 'We have sent a verification email to ${_usernameController.text}';
+
     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Color(0xFF2A364E),
+                    fontSize: fontSize * 1.2
+                ),
+              ),
+              content: Text(
+                text2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Color(0xFF2A364E),
+                    fontSize: fontSize
+                ),
+              ),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)
+              ),
+              insetPadding: EdgeInsets.only(right: (0.1*width), left: (0.1*width)),
+              actions: [
+                Center(
+                    child: isEmailVerified ? Icon(
+                      size: width*0.2,
+                      Icons.check_circle_outline_rounded,
+                      color: Colors.green,
+                    ) : CircularProgressIndicator()
+                )
+              ]
+          );
+        }
     );
 
     try {
@@ -151,7 +191,10 @@ class _SignUpState extends State<SignUp> {
         final user = FirebaseAuth.instance.currentUser!;
         await user.updateDisplayName(name);
 
+        await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+        await checkEmailVerified();
         Navigator.pop(context);
+        await checkIcon();
 
         Navigator.push(
             context,
@@ -173,6 +216,61 @@ class _SignUpState extends State<SignUp> {
         popup('Password is too weak.');
       }
     }
+  }
+
+  Future<void> checkEmailVerified() async {
+    await FirebaseAuth.instance.currentUser?.reload();
+    if (FirebaseAuth.instance.currentUser!.emailVerified) {
+      setState(() {
+        isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
+        text = 'Email successfully verified';
+        text2 = '';
+      });
+    } else {
+      Future.delayed(Duration(seconds: 3));
+      await checkEmailVerified();
+    }
+  }
+
+  Future<void> checkIcon() async {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.04;
+
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+      return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Color(0xFF2A364E),
+                fontSize: fontSize * 1.2
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20)
+          ),
+          insetPadding: EdgeInsets.only(right: (0.1*width), left: (0.1*width)),
+          actions: [
+            Center(
+                child: Icon(
+                  size: width*0.2,
+                  Icons.check_circle_outline_rounded,
+                  color: Colors.green,
+                )
+            )
+          ]
+      );
+    }
+    );
+
+    await Future.delayed(Duration(seconds: 3));
+
+    Navigator.pop(context);
   }
 
   void popup(String message) {
@@ -361,6 +459,8 @@ class _SignUpState extends State<SignUp> {
                                             padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width), top: (0.02*height)),
                                             child: Form(
                                                 child: TextFormField(
+                                                  textCapitalization: TextCapitalization.none,
+                                                  autocorrect: false,
                                                   keyboardType: TextInputType.emailAddress,
                                                   style: TextStyle(
                                                       fontSize: fontSize*1.3,
