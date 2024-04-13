@@ -6,6 +6,8 @@ import 'package:mind_trace/home_page.dart';
 import 'package:mind_trace/signup.dart';
 import 'package:page_transition/page_transition.dart';
 
+import 'forgot.dart';
+
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
 
@@ -57,19 +59,20 @@ class _LoginState extends State<Login> {
       },
     );
     try {
-      if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty)
+      if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _usernameController.text.trim(),
           password: _passwordController.text.trim(),
         );
-      Navigator.pop(context);
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.fade,
-          child: HomePage(),
-        ),
-      );
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.fade,
+            child: HomePage(),
+          ),
+        );
+      }
     } on FirebaseAuthException {
       Navigator.pop(context);
       popup('Incorrect email or password');
@@ -308,7 +311,34 @@ class _LoginState extends State<Login> {
                                               )
                                           ),
                                           Container(
-                                              margin: EdgeInsets.only(top: (0.05*height), bottom: (0.12*height)),
+                                            margin: EdgeInsets.only(top: height*0.02, right: width*0.1),
+                                            alignment: Alignment.topRight,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                    context,
+                                                    PageTransition(
+                                                      type: PageTransitionType.fade,
+                                                      child: Forgot(),
+                                                    )
+                                                );
+                                              },
+                                              child: Container(
+                                                child: Text(
+                                                  'Forgot password?',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Quicksand',
+                                                    fontSize: fontSize * 1.2,
+                                                    fontWeight: FontWeight.normal,
+                                                    letterSpacing: width*0.0015,
+                                                    decoration: TextDecoration.underline
+                                                  ),
+                                                ),
+                                              )
+                                            )
+                                          ),
+                                          Container(
+                                              margin: EdgeInsets.only(top: (0.02*height), bottom: (0.12*height)),
                                               child: ElevatedButton(
                                                   onPressed: () {
                                                     if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {

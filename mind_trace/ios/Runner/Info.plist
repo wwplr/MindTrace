@@ -47,6 +47,7 @@
 		<string>location</string>
 		<string>nearby-interaction</string>
 		<string>processing</string>
+		<string>push-to-talk</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UIFileSharingEnabled</key>

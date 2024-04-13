@@ -285,14 +285,17 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid.toString())
+          .doc(user.uid.toString()+'try')
           .get();
 
       if (documentSnapshot.exists) {
         int setIndex = 0;
+        bool skipCount = false;
         List<String> currentTimestamps = [];
+        List<String> timestampsCount = [];
         List<String> currentMoods = [];
         List<List<String>> currentCategories = [];
+        List<List<String>> categoriesCount = [];
         Map<int, List<String>> newTimestamps = {};
         Map<int, List<String>> newMoods = {};
         Map<int, List<List<String>>> newCategories = {};
@@ -324,16 +327,23 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
               newTimestamps[setIndex] = currentTimestamps;
               newCategories[setIndex] = currentCategories;
               newMoods[setIndex] = currentMoods;
-              setIndex++;
+              if (skipCount) {
+                continue;
+              } else {
+                setIndex++;
+              }
             } else {
               currentTimestamps.add(timestamp);
+              timestampsCount.add(timestamp);
               currentMoods.add(mood);
 
               if (category.isEmpty) {
+                loopCompleted = false;
+                updated = false;
                 tsToPython = timestamp;
                 await sendToPython();
                 currentCategories.add(resultList);
-
+                categoriesCount.add(resultList);
                 await FirebaseFirestore.instance
                     .collection('users')
                     .doc(user.uid.toString())
@@ -341,24 +351,25 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                   timestamp: [mood, result],
                 });
                 updated = true;
+                skipCount = false;
                 uploadText = "File uploaded successfully.";
 
                 print('Fetched categories: $result');
                 resultList = [];
               } else {
-                loopCompleted = true;
+                skipCount = true;
                 updated = true;
-                await Future.delayed(Duration(seconds: 2));
+                loopCompleted = true;
                 uploadText = "The data is already up to date.";
+                continue;
               }
+            }
+            if (timestampsCount.length - (2 * setIndex) == categoriesCount.length) {
+              loopCompleted = true;
             }
           };
 
-          if (sortedTimestamps.length - (2 * setIndex) == currentCategories.length) {
-            loopCompleted = true;
-          }
-
-          if (loopCompleted && updated) {
+          if (loopCompleted == true && updated == true) {
             setState(() {
               timestampList = newTimestamps;
               moodList = newMoods;

@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import Firebase
 import MobileCoreServices
 import Foundation
 
@@ -14,6 +15,8 @@ import Foundation
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
+
+    FirebaseApp.configure()
 
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

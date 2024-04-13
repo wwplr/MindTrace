@@ -147,7 +147,7 @@ class _SignUpState extends State<SignUp> {
                 ),
               ),
               content: Text(
-                'We have sent a verification email to ${_usernameController.text}',
+                'A verification email has been sent to ${_usernameController.text}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Color(0xFF2A364E),

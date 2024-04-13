@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mind_trace/reset.dart';
 import 'package:page_transition/page_transition.dart';
 import 'login.dart';
 
@@ -41,7 +42,7 @@ class _AccountState extends State<Account> {
                           Container(
                             width: width,
                             height: 0.3 * height,
-                            margin: EdgeInsets.only(bottom: 0.3 * height),
+                            margin: EdgeInsets.only(bottom: 0.2 * height),
                             decoration: BoxDecoration(
                                 color: Color(0xFFC6F2FF),
                                 borderRadius: BorderRadius.only(
@@ -82,6 +83,40 @@ class _AccountState extends State<Account> {
                                   ],
                                 )
                             ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(bottom: width*0.1),
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.fade,
+                                        child: Reset(),
+                                      )
+                                  );
+                                },
+                                child: Text(
+                                    'Change Password',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: "Quicksand",
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                      color: Colors.white,
+                                      fontSize: fontSize * 1.5,
+                                      height: 1.05
+                                    )
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  fixedSize: Size(0.45 * width, 0.06 * height),
+                                  backgroundColor: Color(0xFF49688D),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(100)
+                                  ),
+                                  elevation: 2.0,
+                                )
+                            )
                           ),
                           ElevatedButton(
                               onPressed: () {

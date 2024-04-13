@@ -237,7 +237,7 @@ class _HomeState extends State<Home> {
                     Expanded(
                       child: Container(
                         alignment: Alignment.topLeft,
-                        padding: EdgeInsets.only(left: width*0.025, top: height*0.01, bottom: height*0.01),
+                        padding: EdgeInsets.only(left: width*0.025, top: height*0.012, bottom: height*0.012),
                         decoration: BoxDecoration(
                           color: Color(0xFFF8F8F8),
                         ),
@@ -249,7 +249,7 @@ class _HomeState extends State<Home> {
                             'Cancel',
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: width * 0.04,
+                              fontSize: width * 0.05,
                               fontWeight: FontWeight.normal,
                               color: Color(0xFF0062CC),
                               decoration: TextDecoration.none,
@@ -261,7 +261,7 @@ class _HomeState extends State<Home> {
                       Expanded(
                         child: Container(
                           alignment: Alignment.topRight,
-                          padding: EdgeInsets.only(right: width*0.025, top: height*0.01, bottom: height*0.01),
+                          padding: EdgeInsets.only(right: width*0.025, top: height*0.012, bottom: height*0.012),
                           decoration: BoxDecoration(
                             color: Color(0xFFF8F8F8),
                           ),
@@ -288,7 +288,7 @@ class _HomeState extends State<Home> {
                               'Done',
                               textAlign: TextAlign.right,
                               style: TextStyle(
-                                fontSize: width * 0.04,
+                                fontSize: width * 0.05,
                                 fontWeight: FontWeight.normal,
                                 color: Color(0xFF0062CC),
                                 decoration: TextDecoration.none,
@@ -300,7 +300,7 @@ class _HomeState extends State<Home> {
                   ],
                 ),
                 SizedBox(
-                  height: containerHeight - 50,
+                  height: containerHeight - width*0.115,
                   child: CupertinoDatePicker(
                     showDayOfWeek: true,
                     mode: CupertinoDatePickerMode.date,

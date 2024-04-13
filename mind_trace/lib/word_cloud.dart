@@ -47,7 +47,7 @@ class _WordCloudState extends State<WordCloud> {
       );
     } else {
       double maxFontSize = fontSize * 2.8;
-      double minFontSize = fontSize * 1;
+      double minFontSize = fontSize * 1.05;
       double fontSizeRange = maxFontSize - minFontSize;
 
       double maxValue = widget.wordList
@@ -81,13 +81,17 @@ class _WordCloudState extends State<WordCloud> {
 
               colorIndex = (colorIndex + 1) % colors.length;
 
-              int shouldRotate(String word) {
-                if(word.length > 8) {
-                  return 1;
-                } else if (word.length <= 5) {
+              int shouldRotate(String word, int value) {
+                if (value == maxValue.toInt()) {
+                  return 0;
+                }
+
+                if (word.length >= 8 || (word.length < 8 && word.length >= 4 && value == maxValue)) {
+                  return 0;
+                } else if (word.length < 8 && word.length >= 4) {
                   return -1;
                 } else {
-                  return 0;
+                  return 1;
                 }
               }
 
@@ -102,7 +106,7 @@ class _WordCloudState extends State<WordCloud> {
                   widget.onWordTap(valueText.toString());
                 },
                 child: RotatedBox(
-                  quarterTurns: shouldRotate(wordText),
+                  quarterTurns: shouldRotate(wordText, valueText),
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
