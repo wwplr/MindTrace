@@ -68,12 +68,13 @@ class _TSliderState extends State<TSlider> {
     }
   }
 
+  double currentScale = 1;
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.03;
-    double _currentScale = 1.0;
 
     return PopScope(
         canPop: false,
@@ -108,19 +109,24 @@ class _TSliderState extends State<TSlider> {
                                           double scale = details.scale;
                                           double newScale = scale;
                                           setState(() {
-                                            _currentScale = newScale;
+                                            currentScale = newScale;
                                           });
                                         },
-                                        child: PhotoView(
-                                          imageProvider: AssetImage(item),
-                                          minScale: PhotoViewComputedScale.contained,
-                                          maxScale: PhotoViewComputedScale.covered * 2.0,
-                                          scaleStateController: PhotoViewScaleStateController(),
-                                          backgroundDecoration: BoxDecoration(
-                                            color: Colors.transparent,
+                                        child: Container(
+                                          constraints: BoxConstraints.expand(
+                                          height: height,
                                           ),
-                                          initialScale: PhotoViewComputedScale.contained,
-                                        ),
+                                          child: PhotoView(
+                                            imageProvider: AssetImage(item),
+                                            minScale: PhotoViewComputedScale.contained,
+                                            maxScale: PhotoViewComputedScale.covered * 2.0,
+                                            initialScale: PhotoViewComputedScale.contained,
+                                            scaleStateController: PhotoViewScaleStateController(),
+                                            backgroundDecoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                            ),
+                                          ),
+                                        )
                                       );
                                     },
                                   );
@@ -152,7 +158,8 @@ class _TSliderState extends State<TSlider> {
                                           color: (Theme.of(context).brightness == Brightness.dark
                                               ? Colors.white
                                               : Colors.black)
-                                              .withOpacity(current == entry.key ? 0.9 : 0.4)),
+                                              .withOpacity(current == entry.key ? 0.9 : 0.4)
+                                      ),
                                     ),
                                   );
                                 }).toList(),

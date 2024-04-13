@@ -21,12 +21,14 @@ class TimerProvider extends ChangeNotifier {
   bool _continued = false;
   bool _sending = false;
   bool _isNotificationScheduled = false;
+  Timestamp _startTimestamp = Timestamp.now();
   bool get isSubmitted => _isSubmitted;
   bool get start => _start;
   bool get continued => _continued;
   Timer get timer => _timer;
   bool get isNotifiedScheduled => _isNotificationScheduled;
   bool get sending => _sending;
+  Timestamp get startTimestamp => _startTimestamp;
 
   void setStart(bool value) {
     _start = value;
@@ -88,7 +90,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   bool isSelected2 = false;
   bool isSelected3 = false;
   bool yesClicked = false;
-  late Timestamp startTimestamp;
   Map<int, List<String>> timestampList = {};
   Map<int, List<String>> moodList = {};
   Map<int, List<List<String>>> categoryList = {};
@@ -306,7 +307,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           await Future.delayed(Duration(seconds: 2));
           Navigator.pop(context);
           popup('Please log your mood before uploading.');
-          print('Delay');
         } else {
           List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
 
@@ -374,8 +374,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
         }
       } else {
         print('User document does not exist.');
-        Navigator.pop(context);
         await Future.delayed(Duration(seconds: 2));
+        Navigator.pop(context);
         popup('Please log your mood before uploading.');
       }
     } catch (error) {
@@ -806,7 +806,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                       FirebaseFirestore.instance
                           .collection('users')
                           .doc(user.uid.toString())
-                          .update({formatTimestamp(startTimestamp).toString(): FieldValue.delete()})
+                          .update({formatTimestamp(Provider.of<TimerProvider>(context, listen: false)._startTimestamp).toString(): FieldValue.delete()})
                           .then((_) {
                         print("Entry deleted successfully.");
                       })
@@ -858,11 +858,11 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
             margin: EdgeInsets.only(top: height*0.025),
             child: ElevatedButton (
                 onPressed: () async {
-                  startTimestamp = Timestamp.now();
+                  Provider.of<TimerProvider>(context, listen: false)._startTimestamp = Timestamp.now();
                   await FirebaseFirestore.instance
                       .collection('users')
                       .doc(user.uid.toString())
-                      .set({formatTimestamp(startTimestamp).toString(): [
+                      .set({formatTimestamp(Provider.of<TimerProvider>(context, listen: false)._startTimestamp).toString(): [
                     'Start',
                     ''
                   ]},
