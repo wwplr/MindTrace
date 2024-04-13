@@ -28,9 +28,6 @@ class _SignUpState extends State<SignUp> {
 
   bool isEmailVerified = false;
 
-  String text = '';
-  String text2 = '';
-
   void checkValidation() async {
     await showDialog(
       context: context,
@@ -134,8 +131,6 @@ class _SignUpState extends State<SignUp> {
   void signup() async {
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.04;
-    text = 'Verify your email';
-    text2 = 'We have sent a verification email to ${_usernameController.text}';
 
     showDialog(
         barrierDismissible: false,
@@ -144,7 +139,7 @@ class _SignUpState extends State<SignUp> {
           return AlertDialog(
               backgroundColor: Colors.white,
               title: Text(
-                text,
+                'Verify your email',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Color(0xFF2A364E),
@@ -152,7 +147,7 @@ class _SignUpState extends State<SignUp> {
                 ),
               ),
               content: Text(
-                text2,
+                'We have sent a verification email to ${_usernameController.text}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Color(0xFF2A364E),
@@ -223,8 +218,6 @@ class _SignUpState extends State<SignUp> {
     if (FirebaseAuth.instance.currentUser!.emailVerified) {
       setState(() {
         isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-        text = 'Email successfully verified';
-        text2 = '';
       });
     } else {
       Future.delayed(Duration(seconds: 3));
@@ -233,7 +226,6 @@ class _SignUpState extends State<SignUp> {
   }
 
   Future<void> checkIcon() async {
-    double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double fontSize = width * 0.04;
 
@@ -244,11 +236,19 @@ class _SignUpState extends State<SignUp> {
       return AlertDialog(
           backgroundColor: Colors.white,
           title: Text(
-            text,
+            'Email Verified',
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: Color(0xFF2A364E),
                 fontSize: fontSize * 1.2
+            ),
+          ),
+          content: Text(
+            'Your email address was successfully verified.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Color(0xFF2A364E),
+                fontSize: fontSize
             ),
           ),
           shape: RoundedRectangleBorder(
