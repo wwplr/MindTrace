@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ import 'package:mind_trace/slider.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:page_transition/page_transition.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'notification.dart';
@@ -29,6 +32,13 @@ class TimerProvider extends ChangeNotifier {
   bool get isNotifiedScheduled => _isNotificationScheduled;
   bool get sending => _sending;
   Timestamp get startTimestamp => _startTimestamp;
+  double _percentage = 0.0;
+  double get percentage => _percentage;
+
+  void updatePercentage(double newPercentage) {
+    _percentage = newPercentage;
+    notifyListeners();
+  }
 
   void setStart(bool value) {
     _start = value;
@@ -60,12 +70,12 @@ class TimerProvider extends ChangeNotifier {
     _timer.cancel();
     notifyListeners();
   }
+
   @override
   void dispose() {
     super.dispose();
   }
 }
-
 class Add extends StatefulWidget {
   const Add({Key? key}) : super(key: key);
 
@@ -104,6 +114,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   late String tsToPython;
   String username = '';
   String uploadText = '';
+  int percentIndex = 0;
+  double emptyCategoryCount = 0;
 
   @override
   void initState() {
@@ -250,46 +262,78 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   }
 
   Future<void> fetchData(double fontSize, double width, double height) async {
+    Provider.of<TimerProvider>(context, listen: false).updatePercentage(0);
+
     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return SizedBox(
-            width: width*0.7,
-            height: height*0.4,
-            child: AlertDialog(
-                backgroundColor: Colors.white,
-                content: Text("This process may take a few minutes. Please do not leave the app.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Color(0xFF2A364E),
-                        fontSize: fontSize*1.45,
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w500
-                    )
-                ),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)
-                ),
-                insetPadding: EdgeInsets.only(right: fontSize*3, left: fontSize*3),
-                actions: [
-                  Center(
-                      child: CircularProgressIndicator()
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return Consumer<TimerProvider>(
+            builder: (BuildContext context, value, Widget? child) {
+              return SizedBox(
+                  width: width*0.7,
+                  height: height*0.4,
+                  child: AlertDialog(
+                    backgroundColor: Colors.white,
+                    content: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'This process may take a few minutes. Please do not leave the app.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF2A364E),
+                            fontSize: fontSize * 1.45,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Container(
+                            margin: EdgeInsets.only(top: height*0.015),
+                            alignment: Alignment.center,
+                            child: LinearPercentIndicator(
+                              percent: value.percentage,
+                              center: Text(
+                                '${(value.percentage * 100).toInt()}%',
+                                style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontFamily: 'Quicksand',
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600
+                                ),
+                              ),
+                              lineHeight: height*0.0235,
+                              barRadius: Radius.circular(width * 0.047),
+                              progressColor: Color(0xFF49688D),
+                              backgroundColor: Colors.grey.shade400,
+                              animateFromLastPercent: true,
+                              animation: true,
+                            )
+                        )
+                      ],
+                    ),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)
+                    ),
+                    insetPadding: EdgeInsets.only(right: fontSize*3, left: fontSize*3),
                   )
-                ]
-            )
-        );
-      },
+              );
+            },
+          );
+        }
     );
 
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid.toString()+'try')
+          .doc(user.uid.toString())
           .get();
 
       if (documentSnapshot.exists) {
         int setIndex = 0;
+        percentIndex = 0;
         bool skipCount = false;
         List<String> currentTimestamps = [];
         List<String> timestampsCount = [];
@@ -312,8 +356,12 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           popup('Please log your mood before uploading.');
         } else {
           List<String> sortedTimestamps = data.map((entry) => entry['timestamp'].toString()).toList()..sort();
+          emptyCategoryCount = data.where((entry) => entry['categories'].isEmpty
+              && entry['moods'] != 'Start'
+              && entry['moods'] != 'Finish').length.toDouble();
+          print(emptyCategoryCount);
 
-          for (String timestamp in sortedTimestamps) {
+            for (String timestamp in sortedTimestamps) {
             var entry = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp);
 
             String mood = entry['moods'];
@@ -353,23 +401,36 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                 updated = true;
                 skipCount = false;
                 uploadText = "File uploaded successfully.";
-
                 print('Fetched categories: $result');
+
+                for (double i = Provider.of<TimerProvider>(context, listen: false).percentage;
+                i <= ((percentIndex+1) / emptyCategoryCount) && i <= 1.0;
+                i += 0.01) {
+                  Provider.of<TimerProvider>(context, listen: false).updatePercentage(i);
+                  await Future.delayed(Duration(milliseconds: 50));
+                }
+                percentIndex++;
+
                 resultList = [];
               } else {
                 skipCount = true;
                 updated = true;
                 loopCompleted = true;
                 uploadText = "The data is already up to date.";
+                if (emptyCategoryCount == 0) {
+                  Provider.of<TimerProvider>(context, listen: false).updatePercentage(1);
+                }
                 continue;
               }
             }
-            if (timestampsCount.length - (2 * setIndex) == categoriesCount.length) {
+            if (emptyCategoryCount == categoriesCount.length) {
               loopCompleted = true;
             }
           };
 
-          if (loopCompleted == true && updated == true) {
+          if (loopCompleted == true 
+              && updated == true 
+              && Provider.of<TimerProvider>(context, listen: false).percentage >= 0.99) {
             setState(() {
               timestampList = newTimestamps;
               moodList = newMoods;
@@ -396,10 +457,18 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
 
   Future<void> sendToPython() async {
     Provider.of<TimerProvider>(context, listen: false).setSending(true);
+    print('Timestamp sent: $tsToPython');
+
+    for (double i = percentIndex / emptyCategoryCount;
+    i <= ((percentIndex / emptyCategoryCount) + ((percentIndex + 1) / emptyCategoryCount)) / 2;
+    i += 0.01) {
+      Provider.of<TimerProvider>(context, listen: false).updatePercentage(i);
+      await Future.delayed(Duration(milliseconds: 50));
+    }
 
     String pythonScriptUrl = 'http://16.170.236.95:5000/';
     try {
-      print('Timestamp sent: $tsToPython');
+
       var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl))
         ..fields['timestamp_r'] = tsToPython
         ..files.add(await http.MultipartFile.fromPath('file', file.path));
@@ -423,6 +492,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
       print('Error sending file to Python server: $e');
     }
   }
+
 
   String formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();

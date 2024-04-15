@@ -22,6 +22,7 @@ class _HomeState extends State<Home> {
   String timeText = '';
   String categoriesText = '';
   String selectedValue = '';
+  String selectedWord = 'Word Count';
   String generate = 'Click generate to view your mood insights.';
   Map<int, List<int>> moodList = {};
   Map<int, List<String>> dateList = {};
@@ -358,18 +359,22 @@ class _HomeState extends State<Home> {
   }
 
   List<String> removePluralSuffix(List<String> categories) {
+    Set<String> uniqueCategories = {};
     List<String> updatedCategories = [];
 
     categories.forEach((category) {
-      if (category.endsWith('s')) {
-        updatedCategories.add(category.substring(0, category.length - 1));
+      String modifiedCategory = category.endsWith('s') ? category.substring(0, category.length - 1) : category;
+      if (uniqueCategories.contains(modifiedCategory)) {
+        updatedCategories.add(modifiedCategory);
       } else {
         updatedCategories.add(category);
       }
+      uniqueCategories.add(category);
     });
 
     return updatedCategories;
   }
+
 
   Map<String, dynamic> calculateWordFrequencies(List<String> categories) {
     for (String category in categories) {
@@ -732,7 +737,7 @@ class _HomeState extends State<Home> {
                                 ),
                               ),
                               Text(
-                                'Count: $selectedValue',
+                                '$selectedWord: $selectedValue',
                                 style: TextStyle(
                                   fontFamily: 'Quicksand',
                                   fontSize: fontSize * 1.4,
@@ -747,8 +752,9 @@ class _HomeState extends State<Home> {
                           alignment: Alignment.center,
                           child: WordCloud(
                             wordList: wordClouds,
-                            onWordTap: (value) {
+                            onWordTap: (word, value) {
                               setState(() {
+                                selectedWord = word;
                                 selectedValue = value;
                               });
                             },

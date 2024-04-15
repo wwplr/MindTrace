@@ -528,6 +528,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  percent_indicator:
+    dependency: "direct main"
+    description:
+      name: percent_indicator
+      sha256: c37099ad833a883c9d71782321cb65c3a848c21b6939b6185f0ff6640d05814c
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.3"
   petitparser:
     dependency: transitive
     description:
@@ -653,6 +661,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  sn_progress_dialog:
+    dependency: "direct main"
+    description:
+      name: sn_progress_dialog
+      sha256: "6ecd6ce8ac3cffc879fbbbe2259652b526d8769401e4726a67a5a5e2dac3d252"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   source_span:
     dependency: transitive
     description:

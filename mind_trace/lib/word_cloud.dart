@@ -4,7 +4,7 @@ import 'package:flutter_scatter/flutter_scatter.dart';
 
 class WordCloud extends StatefulWidget {
   final List<Map<String, dynamic>> wordList;
-  final Function(dynamic) onWordTap;
+  final Function(String, dynamic) onWordTap;
 
   WordCloud({Key? key, required this.wordList, required this.onWordTap})
       : super(key: key);
@@ -47,7 +47,7 @@ class _WordCloudState extends State<WordCloud> {
       );
     } else {
       double maxFontSize = fontSize * 2.8;
-      double minFontSize = fontSize * 1.05;
+      double minFontSize = fontSize * 1.15;
       double fontSizeRange = maxFontSize - minFontSize;
 
       double maxValue = widget.wordList
@@ -103,7 +103,7 @@ class _WordCloudState extends State<WordCloud> {
                     });
                     borderMap[wordText] = true;
                   });
-                  widget.onWordTap(valueText.toString());
+                  widget.onWordTap(wordText, valueText.toString());
                 },
                 child: RotatedBox(
                   quarterTurns: shouldRotate(wordText, valueText),

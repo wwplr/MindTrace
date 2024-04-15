@@ -243,6 +243,9 @@ class _LoginState extends State<Login> {
                                               child: Form(
                                                   child: TextFormField(
                                                     keyboardType: TextInputType.emailAddress,
+                                                    autocorrect: false,
+                                                    enableSuggestions: false,
+                                                    enableInteractiveSelection: true,
                                                     style:  TextStyle(
                                                         fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
@@ -279,6 +282,7 @@ class _LoginState extends State<Login> {
                                                     obscureText: _securedPassword,
                                                     enableInteractiveSelection: false,
                                                     autocorrect: false,
+                                                    enableSuggestions: false,
                                                     style: TextStyle(
                                                         fontSize: fontSize*1.3,
                                                         fontFamily: "Quicksand",
@@ -291,6 +295,7 @@ class _LoginState extends State<Login> {
                                                     textInputAction: TextInputAction.done,
                                                     cursorColor: Color(0xFF2A364E),
                                                     decoration: InputDecoration(
+                                                      contentPadding: EdgeInsets.only(top: height*0.015),
                                                       hintText: 'Password',
                                                       hintStyle: TextStyle(
                                                           fontSize: fontSize*1.3,

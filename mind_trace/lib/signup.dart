@@ -427,6 +427,9 @@ class _SignUpState extends State<SignUp> {
                                             padding: EdgeInsets.only(left: (0.1*width), right: (0.1*width)),
                                             child: Form(
                                                 child: TextFormField(
+                                                  textCapitalization: TextCapitalization.words,
+                                                  autocorrect: false,
+                                                  enableSuggestions: false,
                                                   style: TextStyle(
                                                       fontSize: fontSize*1.3,
                                                       fontFamily: "Quicksand",
@@ -461,6 +464,7 @@ class _SignUpState extends State<SignUp> {
                                                 child: TextFormField(
                                                   textCapitalization: TextCapitalization.none,
                                                   autocorrect: false,
+                                                  enableSuggestions: false,
                                                   keyboardType: TextInputType.emailAddress,
                                                   style: TextStyle(
                                                       fontSize: fontSize*1.3,
@@ -509,6 +513,7 @@ class _SignUpState extends State<SignUp> {
                                                   maxLines: 1,
                                                   cursorColor: Color(0xFF2A364E),
                                                   decoration: InputDecoration(
+                                                    contentPadding: EdgeInsets.only(top: height*0.015),
                                                     hintText: 'Password',
                                                     hintStyle: TextStyle(
                                                         fontSize: fontSize*1.3,
@@ -574,6 +579,7 @@ class _SignUpState extends State<SignUp> {
                                                   maxLines: 1,
                                                   cursorColor: Color(0xFF2A364E),
                                                   decoration: InputDecoration(
+                                                    contentPadding: EdgeInsets.only(top: height*0.015),
                                                     hintText: 'Confirm Password',
                                                     hintStyle: TextStyle(
                                                         fontSize: fontSize*1.3,

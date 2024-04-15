@@ -193,7 +193,15 @@ class _ResetState extends State<Reset> {
       await user?.updatePassword(newPassword);
       await popup2();
       print('Password changed successfully.');
+      Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.fade,
+            child: HomePage(),
+          )
+      );
     } catch (e) {
+      popup('Your current password is incorrect. Please try again.');
       print('Error changing password: $e');
     }
   }
@@ -271,6 +279,7 @@ class _ResetState extends State<Reset> {
                                                 obscureText: _securedPassword3,
                                                 enableSuggestions: false,
                                                 enableInteractiveSelection: false,
+                                                autocorrect: false,
                                                 style: TextStyle(
                                                     fontSize: fontSize*1,
                                                     fontFamily: "Quicksand",
@@ -281,6 +290,7 @@ class _ResetState extends State<Reset> {
                                                 maxLines: 1,
                                                 cursorColor: Color(0xFF2A364E),
                                                 decoration: InputDecoration(
+                                                  contentPadding: EdgeInsets.only(top: height*0.015),
                                                   hintText: 'Current Password',
                                                   hintStyle: TextStyle(
                                                       fontSize: fontSize,
@@ -319,6 +329,7 @@ class _ResetState extends State<Reset> {
                                                 maxLines: 1,
                                                 cursorColor: Color(0xFF2A364E),
                                                 decoration: InputDecoration(
+                                                  contentPadding: EdgeInsets.only(top: height*0.015),
                                                   hintText: 'Password',
                                                   hintStyle: TextStyle(
                                                       fontSize: fontSize,
@@ -374,6 +385,7 @@ class _ResetState extends State<Reset> {
                                                 obscureText: _securedPassword2,
                                                 enableSuggestions: false,
                                                 enableInteractiveSelection: false,
+                                                autocorrect: false,
                                                 style: TextStyle(
                                                     fontSize: fontSize*1,
                                                     fontFamily: "Quicksand",
@@ -384,6 +396,7 @@ class _ResetState extends State<Reset> {
                                                 maxLines: 1,
                                                 cursorColor: Color(0xFF2A364E),
                                                 decoration: InputDecoration(
+                                                  contentPadding: EdgeInsets.only(top: height*0.015),
                                                   hintText: 'Confirm Password',
                                                   hintStyle: TextStyle(
                                                       fontSize: fontSize,
@@ -476,13 +489,6 @@ class _ResetState extends State<Reset> {
                                                   checkValidation();
                                                 } else {
                                                   await changePassword(_currentPassword.text, _passwordController2.text, email.email!);
-                                                  Navigator.push(
-                                                      context,
-                                                      PageTransition(
-                                                        type: PageTransitionType.fade,
-                                                        child: HomePage(),
-                                                      )
-                                                  );
                                                 }
                                               },
                                               style: ElevatedButton.styleFrom(
