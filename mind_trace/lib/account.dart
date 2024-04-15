@@ -522,6 +522,7 @@ class _AccountState extends State<Account> {
                                               controller: controller2,
                                               enableSuggestions: false,
                                               autocorrect: false,
+                                              keyboardType: TextInputType.emailAddress,
                                               style: TextStyle(
                                                 fontSize: fontSize*1.2,
                                                 fontFamily: "Quicksand",
