@@ -257,6 +257,7 @@ class _LoginState extends State<Login> {
                                                     maxLines: 1,
                                                     cursorColor: Color(0xFF2A364E),
                                                     decoration: InputDecoration(
+                                                      contentPadding: EdgeInsets.only(top: height*0.007, left: width*0.005),
                                                       hintText: 'Username',
                                                       hintStyle: TextStyle(
                                                           fontSize: fontSize*1.3,
@@ -295,7 +296,7 @@ class _LoginState extends State<Login> {
                                                     textInputAction: TextInputAction.done,
                                                     cursorColor: Color(0xFF2A364E),
                                                     decoration: InputDecoration(
-                                                      contentPadding: EdgeInsets.only(top: height*0.015),
+                                                      contentPadding: EdgeInsets.only(top: height*0.015, left: width*0.005),
                                                       hintText: 'Password',
                                                       hintStyle: TextStyle(
                                                           fontSize: fontSize*1.3,
@@ -333,9 +334,8 @@ class _LoginState extends State<Login> {
                                                   'Forgot password?',
                                                   style: TextStyle(
                                                     fontFamily: 'Quicksand',
-                                                    fontSize: fontSize * 1.2,
+                                                    fontSize: fontSize * 1.215,
                                                     fontWeight: FontWeight.normal,
-                                                    letterSpacing: width*0.0015,
                                                     decoration: TextDecoration.underline
                                                   ),
                                                 ),

@@ -290,7 +290,7 @@ class _ResetState extends State<Reset> {
                                                 maxLines: 1,
                                                 cursorColor: Color(0xFF2A364E),
                                                 decoration: InputDecoration(
-                                                  contentPadding: EdgeInsets.only(top: height*0.015),
+                                                  contentPadding: EdgeInsets.only(top: height*0.015, left: width*0.005),
                                                   hintText: 'Current Password',
                                                   hintStyle: TextStyle(
                                                       fontSize: fontSize,
@@ -329,7 +329,7 @@ class _ResetState extends State<Reset> {
                                                 maxLines: 1,
                                                 cursorColor: Color(0xFF2A364E),
                                                 decoration: InputDecoration(
-                                                  contentPadding: EdgeInsets.only(top: height*0.015),
+                                                  contentPadding: EdgeInsets.only(top: height*0.015, left: width*0.005),
                                                   hintText: 'Password',
                                                   hintStyle: TextStyle(
                                                       fontSize: fontSize,
@@ -396,7 +396,7 @@ class _ResetState extends State<Reset> {
                                                 maxLines: 1,
                                                 cursorColor: Color(0xFF2A364E),
                                                 decoration: InputDecoration(
-                                                  contentPadding: EdgeInsets.only(top: height*0.015),
+                                                  contentPadding: EdgeInsets.only(top: height*0.015, left: width*0.005),
                                                   hintText: 'Confirm Password',
                                                   hintStyle: TextStyle(
                                                       fontSize: fontSize,
@@ -499,14 +499,14 @@ class _ResetState extends State<Reset> {
                                                 ),
                                                 elevation: 2.0,
                                               ),
-                                              child: Text('Reset',
+                                              child: Text('Change',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     fontFamily: "Quicksand",
                                                     fontWeight: FontWeight.w500,
                                                     letterSpacing: 0.5,
                                                     color: Colors.white,
-                                                    fontSize: fontSize*1.5,
+                                                    fontSize: fontSize*1.4,
                                                   )
                                               )
                                           )

@@ -76,6 +76,9 @@ class StackedBarChartState extends State<StackedBarChart> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double fontSize = width * 0.03;
+
     if (widget.mood.isEmpty) {
       return Container(
       );
@@ -84,15 +87,24 @@ class StackedBarChartState extends State<StackedBarChart> {
     final maxTotalMoodChanges = widget.mood.values.map((e) => e.length).reduce((value, element) => value > element? value : element);
     final blockHeight = (widget.maxHeight / maxTotalMoodChanges) - widget.maxHeight/13;
     final totalChartWidth = (widget.barWidth * widget.mood.length) + widget.barSpacing * (widget.mood.length - 1);
-    double width = MediaQuery.of(context).size.width;
-    double fontSize = width * 0.03;
 
     return (widget.mood.length >= 6) ? Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           margin: EdgeInsets.only(left: widget.barWidth),
-          child: Column(
+          child: (maxTotalMoodChanges == 1 && widget.mood.length == 1) ? Container(
+            margin: EdgeInsets.only(top: blockHeight/1.8),
+            child: Text(
+                'Undefined',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w500,
+                    fontSize: fontSize*1.15
+                )
+            ),
+          ) : Column(
             verticalDirection: VerticalDirection.up,
             children: List.generate(
                 maxTotalMoodChanges,
@@ -144,7 +156,7 @@ class StackedBarChartState extends State<StackedBarChart> {
           child: SingleChildScrollView(
               controller: scrollController,
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.only(left: 0),
+              padding: EdgeInsets.only(right: width * 0.1),
               physics: AlwaysScrollableScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -157,7 +169,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                         height: widget.maxHeight,
                         child: GestureDetector(
                           onTapDown: (TapDownDetails details) {
-                            handleBlockTap(details, true);
+                            handleBlockTap(details, true, width);
                           },
                           onTapCancel: () {
                             setState(() {
@@ -233,7 +245,18 @@ class StackedBarChartState extends State<StackedBarChart> {
       children: [
         Container(
           margin: EdgeInsets.only(left: widget.barWidth),
-          child: Column(
+          child: (maxTotalMoodChanges == 1 && widget.mood.length == 1) ? Container(
+            margin: EdgeInsets.only(top: blockHeight/1.8),
+            child: Text(
+                'Undefined',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w500,
+                    fontSize: fontSize*1.15
+                )
+            ),
+          ) : Column(
             verticalDirection: VerticalDirection.up,
             children: List.generate(
                 maxTotalMoodChanges,
@@ -411,7 +434,7 @@ class StackedBarChartState extends State<StackedBarChart> {
     });
   }
 
-  void handleBlockTap(TapDownDetails details, bool isPressed) {
+  void handleBlockTap(TapDownDetails details, bool isPressed, double width) {
     setState(() {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
       final tapPosition = renderBox.globalToLocal(details.globalPosition);
@@ -421,7 +444,8 @@ class StackedBarChartState extends State<StackedBarChart> {
 
       final maxInnerBlocks = widget.mood[widget.mood.length - 1]!.length;
 
-      final startX = ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2;
+      final startX = widget.mood.length >= 7 ? ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2.25 :
+      ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2;
       final startY = widget.maxHeight - (maxInnerBlocks * blockHeight);
 
       final relativePosition = Offset(tapPosition.dx - startX + scrollController.offset, tapPosition.dy - startY);
@@ -557,8 +581,7 @@ class BarChartPainter extends CustomPainter {
             ..strokeWidth = borderWidth * 1.5;
         }
 
-        final maxTotalMoodChanges =
-        mood.values.map((e) => e!.length).reduce((value, element) => value > element ? value : element);
+        final maxTotalMoodChanges = mood.values.map((e) => e!.length).reduce((value, element) => value > element ? value : element);
         final blockHeight = size.height / maxTotalMoodChanges;
 
         Rect rect;

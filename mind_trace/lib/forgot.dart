@@ -232,6 +232,7 @@ class _ForgotState extends State<Forgot> {
                                             maxLines: 1,
                                             cursorColor: Color(0xFF2A364E),
                                             decoration: InputDecoration(
+                                              contentPadding: EdgeInsets.only(top: height*0.007, left: width*0.005),
                                               hintText: 'Email address',
                                               hintStyle: TextStyle(
                                                   fontSize: fontSize,

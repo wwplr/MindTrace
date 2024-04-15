@@ -508,7 +508,7 @@ class _HomeState extends State<Home> {
                             fontWeight: FontWeight.w500,
                             fontSize: fontSize*1.1,
                             color: Colors.grey.shade700,
-                          height: 1.05
+                            height: 1.05
                         )
                     )
                 ) : Container(

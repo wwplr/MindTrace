@@ -125,6 +125,7 @@ class _AccountState extends State<Account> {
                                           maxLines: 1,
                                           cursorColor: Color(0xFF2A364E),
                                           decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.only(top: height*0.008, left: width*0.005),
                                             hintStyle: TextStyle(
                                                 fontSize: fontSize*1.2,
                                                 fontFamily: "Quicksand",
@@ -322,7 +323,7 @@ class _AccountState extends State<Account> {
                                           maxLines: 1,
                                           cursorColor: Color(0xFF2A364E),
                                           decoration: InputDecoration(
-                                              contentPadding: EdgeInsets.only(top: height*0.015),
+                                              contentPadding: EdgeInsets.only(top: height*0.0175, left: width*0.005),
                                               hintStyle: TextStyle(
                                                 fontSize: fontSize*1.2,
                                                 fontFamily: "Quicksand",
@@ -533,6 +534,7 @@ class _AccountState extends State<Account> {
                                               maxLines: 1,
                                               cursorColor: Color(0xFF2A364E),
                                               decoration: InputDecoration(
+                                                contentPadding: EdgeInsets.only(top: height*0.008, left: width*0.005),
                                                 hintStyle: TextStyle(
                                                     fontSize: fontSize*1.2,
                                                     fontFamily: "Quicksand",

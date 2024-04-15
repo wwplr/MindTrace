@@ -86,10 +86,12 @@ class _WordCloudState extends State<WordCloud> {
                   return 0;
                 }
 
-                if (word.length >= 8 || (word.length < 8 && word.length >= 4 && value == maxValue)) {
+                if (word.length >= 10 || (word.length < 10 && word.length >= 7 && value == maxValue)) {
                   return 0;
-                } else if (word.length < 8 && word.length >= 4) {
+                } else if (word.length < 10 && word.length >= 7) {
                   return -1;
+                } else if (word.length < 7 && word.length >= 3) {
+                  return 0;
                 } else {
                   return 1;
                 }
