@@ -9,7 +9,7 @@ import 'notification.dart';
 
 final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
-DateTime afternoonScheduledDateTime = DateTime(now.year, now.month, now.day, 14, 00);
+DateTime afternoonScheduledDateTime = DateTime(now.year, now.month, now.day, 13, 00);
 DateTime eveningScheduledDateTime = DateTime(now.year, now.month, now.day, 22, 00);
 
 void main() async {
@@ -23,7 +23,7 @@ void main() async {
   }
   await flutterNotification.scheduleNotification(
     id: 1,
-    title: 'MindTrace',
+    title: 'Mind Trace',
     body: "Are you on TikTok? Don't forget to log your mood.",
     scheduledNotificationDateTime: afternoonScheduledDateTime,
   );
@@ -34,7 +34,7 @@ void main() async {
   }
   await flutterNotification.scheduleNotification(
     id: 2,
-    title: 'MindTrace',
+    title: 'Mind Trace',
     body: "Are you on TikTok? Don't forget to log your mood.",
     scheduledNotificationDateTime: eveningScheduledDateTime,
   );

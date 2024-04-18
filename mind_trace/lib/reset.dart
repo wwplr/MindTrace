@@ -21,7 +21,7 @@ class _ResetState extends State<Reset> {
   Color colour2 = Color(0xFF2A364E);
   Color colour3 = Color(0xFF2A364E);
   Color colour4 = Color(0xFF2A364E);
-  User? user = FirebaseAuth.instance.currentUser;
+  final user = FirebaseAuth.instance.currentUser!;
 
   void checkValidation() async {
     await showDialog(
@@ -160,15 +160,17 @@ class _ResetState extends State<Reset> {
             backgroundColor: Colors.white,
             content: Container(
               height: height*0.05,
-              child: Text(
-                'Your password has been reset.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontFamily: 'Quicksand',
-                    color: Color(0xFF2A364E),
-                    fontSize: fontSize
+              child: Center(
+                child: Text(
+                  'Your password has been reset.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Quicksand',
+                      color: Color(0xFF2A364E),
+                      fontSize: fontSize
+                  ),
                 ),
-              ),
+              )
             ),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20)
@@ -188,9 +190,9 @@ class _ResetState extends State<Reset> {
         email: email,
         password: currentPassword,
       );
-      await user?.reauthenticateWithCredential(credential);
+      await user.reauthenticateWithCredential(credential);
 
-      await user?.updatePassword(newPassword);
+      await user.updatePassword(newPassword);
       await popup2();
       print('Password changed successfully.');
       Navigator.push(

@@ -42,10 +42,7 @@
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>external-accessory</string>
 		<string>fetch</string>
-		<string>location</string>
-		<string>nearby-interaction</string>
 		<string>processing</string>
 		<string>push-to-talk</string>
 		<string>remote-notification</string>
