@@ -138,7 +138,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                     return Container(
                       margin: EdgeInsets.only(bottom: blockHeight),
                       child: Text(
-                          '${index * 20} min',
+                          '${index * 10} min',
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',
@@ -290,7 +290,7 @@ class StackedBarChartState extends State<StackedBarChart> {
                     return Container(
                       margin: EdgeInsets.only(bottom: blockHeight),
                       child: Text(
-                          '${index * 20} min',
+                          '${index * 10} min',
                           style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Quicksand',

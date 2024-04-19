@@ -467,7 +467,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
 
     String pythonScriptUrl = 'http://16.170.236.95:5000/';
     try {
-
       var request = http.MultipartRequest('POST', Uri.parse(pythonScriptUrl))
         ..fields['timestamp_r'] = tsToPython
         ..files.add(await http.MultipartFile.fromPath('file', file.path));
