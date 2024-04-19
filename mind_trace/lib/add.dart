@@ -174,7 +174,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     print('App Lifecycle State: $state');
 
-    final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(minutes: 15));
+    final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(minutes: 10));
     if (Provider.of<TimerProvider>(context, listen: false).isNotifiedScheduled == true &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
       print('Scheduling...');
