@@ -174,9 +174,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     print('App Lifecycle State: $state');
 
-    final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(minutes: 20));
-    if (Provider.of<TimerProvider>(context, listen: false).isNotifiedScheduled == false &&
-        Provider.of<TimerProvider>(context, listen: false).isSubmitted == true &&
+    final logMoodTime = tz.TZDateTime.now(tz.local).add(Duration(minutes: 15));
+    if (Provider.of<TimerProvider>(context, listen: false).isNotifiedScheduled == true &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
       print('Scheduling...');
       await flutterNotification.scheduleNotification(
@@ -186,7 +185,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
         scheduledNotificationDateTime: logMoodTime,
       );
       setState(() {
-        Provider.of<TimerProvider>(context, listen: false).setNotification(true);
+        Provider.of<TimerProvider>(context, listen: false).setNotification(false);
       });
     }
   }
@@ -611,7 +610,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           Container(
               margin: EdgeInsets.only(top: height*0.002),
               child: Text(
-                  "Keep watching TikTok and\n return to log mood later.",
+                  "Continue TikTok session and\n return to log mood later.",
                   style: TextStyle(
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w500,
@@ -851,7 +850,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                       await flutterNotification.cancelNotification(4);
                       setState(() {
                         Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
-                        Provider.of<TimerProvider>(context, listen: false).setNotification(false);
+                        Provider.of<TimerProvider>(context, listen: false).setNotification(true);
                       });
                     } else {
                       popup('Please select an option.');

@@ -510,7 +510,9 @@ class StackedBarChartState extends State<StackedBarChart> {
 
   String getCategories(int blockIndex, int innerBlockIndex) {
     final moodChanges = widget.mood[blockIndex] ?? [];
-    if (innerBlockIndex >= 0 && innerBlockIndex < moodChanges.length) {
+    if (innerBlockIndex == 0) {
+      return 'Start of the session with no predefined categories';
+    } else if (innerBlockIndex > 0 && innerBlockIndex < moodChanges.length) {
       final categoryList = widget.categories[blockIndex];
       var categories = categoryList?[innerBlockIndex];
       categories = categories?.replaceAll('[', '').replaceAll(']', '');
