@@ -369,7 +369,6 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
 
             if (data.isEmpty) {
               Navigator.pop(context);
-              popup('Please log your mood before uploading.');
               continue;
             }
 

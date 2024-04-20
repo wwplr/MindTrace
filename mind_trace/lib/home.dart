@@ -107,6 +107,8 @@ class _HomeState extends State<Home> {
         Map<int, List<String>> newDates = {};
         Map<int, List<String>> newTimes = {};
         Map<int, List<String>> newCategories = {};
+        String previousMood = 'None';
+        String previousTimestamp = 'None';
 
         List<Map<String, dynamic>> data = (documentSnapshot.data() as Map<
             String,
@@ -136,6 +138,8 @@ class _HomeState extends State<Home> {
             String category = entry['categories'];
             String date = convertDate(timestamp);
             String time = convertTime(timestamp);
+            print(previousMood);
+            print(previousTimestamp);
 
             if (mood == 'Start') {
               currentMoods = [];
@@ -153,14 +157,19 @@ class _HomeState extends State<Home> {
               currentDate.add(date);
               currentTime.add(time);
               if (category.isEmpty) {
-                noCategory = true;
-                print('No categories found, please upload your TikTok browsing history.');
-                noDataText = 'No categories found, please upload your TikTok browsing history.';
-                currentCategories.add('No categories found, please upload your TikTok browsing history.');
+                if (previousMood != 'Start') {
+                  noCategory = true;
+                  print('No categories found, please upload your TikTok browsing history.');
+                  noDataText = 'No categories found, please upload your TikTok browsing history.';
+                  currentCategories.add('No categories found, please upload your TikTok browsing history.');
+                }
               } else {
                 currentCategories.add('[$category]');
               }
             }
+
+            previousMood = mood;
+            previousTimestamp = timestamp;
           }
         } else {
           setState(() {
@@ -586,7 +595,8 @@ class _HomeState extends State<Home> {
                                       TextSpan(
                                         text: 'Mood:',
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w600
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black,
                                         ),
                                       ),
                                       TextSpan(text: ' $moodText')
@@ -613,6 +623,7 @@ class _HomeState extends State<Home> {
                                               text: 'Categories:',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w600,
+                                                color: Colors.black,
                                               ),
                                             ),
                                             TextSpan(

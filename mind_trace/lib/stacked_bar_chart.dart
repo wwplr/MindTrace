@@ -88,7 +88,7 @@ class StackedBarChartState extends State<StackedBarChart> {
     final blockHeight = (widget.maxHeight / maxTotalMoodChanges) - widget.maxHeight/13;
     final totalChartWidth = (widget.barWidth * widget.mood.length) + widget.barSpacing * (widget.mood.length - 1);
 
-    return (widget.mood.length >= 6) ? Row(
+    return (widget.mood.length >= 7) ? Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
@@ -443,9 +443,15 @@ class StackedBarChartState extends State<StackedBarChart> {
       final blockHeight = widget.maxHeight / maxTotalMoodChanges;
 
       final maxInnerBlocks = widget.mood[widget.mood.length - 1]!.length;
+      late double startX;
 
-      final startX = widget.mood.length >= 7 ? ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2.25 :
-      ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2;
+      if (widget.mood.length <= 6) {
+        startX = ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / 2;
+      } else {
+        final factor = 2 + ((widget.mood.length - 6) * 0.25);
+        startX = ((widget.barWidth + (widget.mood.length) * widget.barSpacing)) / factor;
+      }
+
       final startY = widget.maxHeight - (maxInnerBlocks * blockHeight);
 
       final relativePosition = Offset(tapPosition.dx - startX + scrollController.offset, tapPosition.dy - startY);
@@ -514,7 +520,7 @@ class StackedBarChartState extends State<StackedBarChart> {
       return 'Start of the session with no predefined categories';
     } else if (innerBlockIndex > 0 && innerBlockIndex < moodChanges.length) {
       final categoryList = widget.categories[blockIndex];
-      var categories = categoryList?[innerBlockIndex];
+      var categories = categoryList?[innerBlockIndex - 1];
       categories = categories?.replaceAll('[', '').replaceAll(']', '');
       return categories ?? '';
     }
