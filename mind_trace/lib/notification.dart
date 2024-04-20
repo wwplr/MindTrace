@@ -41,5 +41,6 @@ class FlutterNotification {
 
   Future<void> cancelNotification(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
+    print('Notification cancelled');
   }
 }

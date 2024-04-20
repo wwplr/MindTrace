@@ -642,8 +642,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                     ]},
                         SetOptions(merge: true)
                     );
-
                     await flutterNotification.cancelNotification(4);
+                    Provider.of<TimerProvider>(context, listen: false).setNotification(false);
                     Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
                     Provider.of<TimerProvider>(context, listen: false).setStart(true);
                   },
