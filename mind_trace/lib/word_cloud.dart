@@ -67,9 +67,13 @@ class _WordCloudState extends State<WordCloud> {
             children: widget.wordList.map((word) {
               String wordText = word['word'] as String;
               int valueText = word['value'];
-              double wordFontSize = minFontSize +
-                  ((word['value'] - minValue) / (maxValue - minValue)) *
-                      fontSizeRange;
+              double wordFontSize;
+              if (maxValue == minValue) {
+                wordFontSize = fontSize;
+              } else {
+                wordFontSize = minFontSize +
+                    ((word['value'] - minValue) / (maxValue - minValue)) * fontSizeRange;
+              }
 
 
               Color textColor = strokeMap[wordText] != null
