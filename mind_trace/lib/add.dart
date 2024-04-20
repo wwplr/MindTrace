@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -337,6 +335,8 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
       if (documentSnapshot.exists) {
         int setIndex = 0;
         percentIndex = 0;
+        String previousMood = 'None';
+        String previousTimestamp = 'None';
         bool skipCount = false;
         List<String> currentTimestamps = [];
         List<String> timestampsCount = [];
@@ -364,24 +364,77 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
               && entry['moods'] != 'Finish').length.toDouble();
           print(emptyCategoryCount);
 
-            for (String timestamp in sortedTimestamps) {
+          for (String timestamp in sortedTimestamps) {
             var entry = data.firstWhere((entry) => entry['timestamp'].toString() == timestamp);
+
+            if (data.isEmpty) {
+              Navigator.pop(context);
+              popup('Please log your mood before uploading.');
+              continue;
+            }
 
             String mood = entry['moods'];
             String category = entry['categories'];
+            print('Previous mood: $previousMood');
+            print('Current mood: $mood');
 
             if (mood == 'Start') {
-              currentTimestamps = [];
-              currentCategories = [];
-              currentMoods = [];
-            } else if (mood == 'Finish') {
-              newTimestamps[setIndex] = currentTimestamps;
-              newCategories[setIndex] = currentCategories;
-              newMoods[setIndex] = currentMoods;
-              if (skipCount) {
-                continue;
+              if (previousMood == 'Start') {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid.toString())
+                    .update({previousTimestamp: FieldValue.delete(),
+                }).then((_) {
+                  print("Start deleted successfully.");
+                });
+              } else if (previousMood == 'Finish' || previousMood == 'None') {
+                currentTimestamps = [];
+                currentCategories = [];
+                currentMoods = [];
               } else {
-                setIndex++;
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid.toString())
+                    .set({addSeconds(previousTimestamp): [
+                  'Finish',
+                  ''
+                ]},
+                    SetOptions(merge: true)
+                ).then((_) {
+                  print("Finish added successfully.");
+                });
+              }
+            } else if (mood == 'Finish') {
+              if (previousMood == 'Finish') {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid.toString())
+                    .update({timestamp: FieldValue.delete(),
+                }).then((_) {
+                  print("Finish deleted successfully.");
+                });
+              } else if (previousMood == 'Start') {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid.toString())
+                    .update({previousTimestamp: FieldValue.delete(),
+                }).then((_) {
+                  print("Start deleted successfully.");
+                });
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid.toString())
+                    .update({timestamp: FieldValue.delete(),
+                }).then((_) {
+                  print("Finish deleted successfully.");
+                });
+              } else {
+                newTimestamps[setIndex] = currentTimestamps;
+                newCategories[setIndex] = currentCategories;
+                newMoods[setIndex] = currentMoods;
+                if (!skipCount) {
+                  setIndex++;
+                }
               }
             } else {
               currentTimestamps.add(timestamp);
@@ -423,12 +476,14 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                 if (emptyCategoryCount == 0) {
                   Provider.of<TimerProvider>(context, listen: false).updatePercentage(1);
                 }
-                continue;
               }
             }
             if (emptyCategoryCount == categoriesCount.length) {
               loopCompleted = true;
             }
+
+            previousMood = mood;
+            previousTimestamp = timestamp;
           };
 
           if (loopCompleted == true 
@@ -495,6 +550,15 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     }
   }
 
+  String addSeconds(String timestamp) {
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+    DateTime dateTime = dateFormat.parse(timestamp);
+
+    dateTime = dateTime.add(Duration(seconds: 5));
+    String newTimestamp = dateFormat.format(dateTime);
+
+    return newTimestamp;
+  }
 
   String formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();

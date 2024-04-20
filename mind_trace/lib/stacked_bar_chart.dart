@@ -96,7 +96,7 @@ class StackedBarChartState extends State<StackedBarChart> {
           child: (maxTotalMoodChanges == 1 && widget.mood.length == 1) ? Container(
             margin: EdgeInsets.only(top: blockHeight/1.8),
             child: Text(
-                'Undefined',
+                'Start',
                 style: TextStyle(
                     color: Colors.black,
                     fontFamily: 'Quicksand',
@@ -248,7 +248,7 @@ class StackedBarChartState extends State<StackedBarChart> {
           child: (maxTotalMoodChanges == 1 && widget.mood.length == 1) ? Container(
             margin: EdgeInsets.only(top: blockHeight/1.8),
             child: Text(
-                'Undefined',
+                'Start',
                 style: TextStyle(
                     color: Colors.black,
                     fontFamily: 'Quicksand',

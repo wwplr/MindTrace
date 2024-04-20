@@ -214,7 +214,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> getDatePicker(double height, double width) async {
-    double containerHeight = height * 0.31;
+    double containerHeight = height * 0.325;
     containerHeight = containerHeight > height ? height : containerHeight;
 
     setState(() {
@@ -238,7 +238,7 @@ class _HomeState extends State<Home> {
                     Expanded(
                       child: Container(
                         alignment: Alignment.topLeft,
-                        padding: EdgeInsets.only(left: width*0.025, top: height*0.012, bottom: height*0.012),
+                        padding: EdgeInsets.only(left: width*0.025, top: height*0.01, bottom: height*0.01),
                         decoration: BoxDecoration(
                           color: Color(0xFFF8F8F8),
                         ),
@@ -262,7 +262,7 @@ class _HomeState extends State<Home> {
                       Expanded(
                         child: Container(
                           alignment: Alignment.topRight,
-                          padding: EdgeInsets.only(right: width*0.025, top: height*0.012, bottom: height*0.012),
+                          padding: EdgeInsets.only(right: width*0.025, top: height*0.01, bottom: height*0.01),
                           decoration: BoxDecoration(
                             color: Color(0xFFF8F8F8),
                           ),
