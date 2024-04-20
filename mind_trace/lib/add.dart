@@ -392,6 +392,15 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                 currentCategories = [];
                 currentMoods = [];
               } else {
+                //If 'Finish' is not logged, do it's job
+                newTimestamps[setIndex] = currentTimestamps;
+                newCategories[setIndex] = currentCategories;
+                newMoods[setIndex] = currentMoods;
+                if (!skipCount) {
+                  setIndex++;
+                }
+
+                //Then add 'Finish' to the database to correct the format
                 await FirebaseFirestore.instance
                     .collection('users')
                     .doc(user.uid.toString())
@@ -403,6 +412,11 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                 ).then((_) {
                   print("Finish added successfully.");
                 });
+
+                //Do normal 'Start' job
+                currentTimestamps = [];
+                currentCategories = [];
+                currentMoods = [];
               }
             } else if (mood == 'Finish') {
               if (previousMood == 'Finish') {
@@ -472,7 +486,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                 skipCount = true;
                 updated = true;
                 loopCompleted = true;
-                uploadText = "The data is already up to date.";
+                uploadText = 'The data is already up to date.';
                 if (emptyCategoryCount == 0) {
                   Provider.of<TimerProvider>(context, listen: false).updatePercentage(1);
                 }
@@ -554,7 +568,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
     DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
     DateTime dateTime = dateFormat.parse(timestamp);
 
-    dateTime = dateTime.add(Duration(seconds: 5));
+    dateTime = dateTime.add(Duration(seconds: 1));
     String newTimestamp = dateFormat.format(dateTime);
 
     return newTimestamp;
