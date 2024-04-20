@@ -116,6 +116,10 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
   String uploadText = '';
   int percentIndex = 0;
   double emptyCategoryCount = 0;
+  bool submitPressed = false;
+  bool cancelPressed = false;
+  bool finishPressed = false;
+  bool startPressed = false;
 
   @override
   void initState() {
@@ -632,7 +636,10 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           ),
           Container(
               child: ElevatedButton (
-                  onPressed: () async {
+                  onPressed: finishPressed ? null : () async {
+                    setState(() {
+                      finishPressed = true;
+                    });
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid.toString())
@@ -643,9 +650,12 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                         SetOptions(merge: true)
                     );
                     await flutterNotification.cancelNotification(4);
-                    Provider.of<TimerProvider>(context, listen: false).setNotification(false);
-                    Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
-                    Provider.of<TimerProvider>(context, listen: false).setStart(true);
+                    setState(() {
+                      Provider.of<TimerProvider>(context, listen: false).setNotification(false);
+                      Provider.of<TimerProvider>(context, listen: false).setSubmit(false);
+                      Provider.of<TimerProvider>(context, listen: false).setStart(true);
+                      finishPressed = false;
+                    });
                   },
                   child: Text(
                       'Finish',
@@ -835,8 +845,11 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           Container(
               margin: EdgeInsets.only(top: height*0.02),
               child: ElevatedButton (
-                  onPressed: () async {
+                  onPressed: submitPressed ? null : () async {
                     if (isSelected==true || isSelected2==true || isSelected3==true) {
+                      setState(() {
+                        submitPressed = true;
+                      });
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc(user.uid.toString())
@@ -850,6 +863,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                       setState(() {
                         Provider.of<TimerProvider>(context, listen: false).setSubmit(true);
                         Provider.of<TimerProvider>(context, listen: false).setNotification(true);
+                        submitPressed = false;
                       });
                     } else {
                       popup('Please select an option.');
@@ -936,7 +950,10 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
         Container(
             margin: EdgeInsets.only(top: height*0.025),
             child: ElevatedButton (
-                onPressed: () async {
+                onPressed: startPressed ? null : () async {
+                  setState(() {
+                    startPressed = true;
+                  });
                   Provider.of<TimerProvider>(context, listen: false)._startTimestamp = Timestamp.now();
                   await FirebaseFirestore.instance
                       .collection('users')
@@ -947,7 +964,10 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                   ]},
                       SetOptions(merge: true)
                   );
-                  Provider.of<TimerProvider>(context, listen: false).setStart(false);
+                  setState(() {
+                    Provider.of<TimerProvider>(context, listen: false).setStart(false);
+                    startPressed = false;
+                  });
                 },
                 child: Text(
                     'Yes',

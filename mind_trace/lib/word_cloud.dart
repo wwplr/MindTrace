@@ -46,8 +46,8 @@ class _WordCloudState extends State<WordCloud> {
         ),
       );
     } else {
-      double maxFontSize = fontSize * 2.8;
-      double minFontSize = fontSize * 1.15;
+      double maxFontSize = fontSize * 3.45;
+      double minFontSize = fontSize * 1.7;
       double fontSizeRange = maxFontSize - minFontSize;
 
       double maxValue = widget.wordList

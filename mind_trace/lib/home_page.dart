@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 3))
+    Future.delayed(const Duration(milliseconds: 2500))
         .then((value) => {FlutterNativeSplash.remove()}
     );
 
