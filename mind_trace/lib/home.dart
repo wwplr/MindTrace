@@ -94,7 +94,7 @@ class _HomeState extends State<Home> {
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid.toString())
+          .doc(user.uid)
           .get();
 
       if (documentSnapshot.exists) {
@@ -353,7 +353,7 @@ class _HomeState extends State<Home> {
           if (mood != 'Start' && mood != 'Finish' && category != '') {
             List<String> separatedCategories = category
                 .split(',')
-                .map((category) => category.trim().toLowerCase()).toList();
+                .map((category) => category.replaceAll(' ', '').replaceAll('-', '').trim().toLowerCase()).toList();
             List<String> finalCategories = removePluralSuffix(separatedCategories);
             categories.addAll(finalCategories);
           }
@@ -751,7 +751,7 @@ class _HomeState extends State<Home> {
                                 '$selectedWord: $selectedValue',
                                 style: TextStyle(
                                   fontFamily: 'Quicksand',
-                                  fontSize: fontSize * 1.4,
+                                  fontSize: fontSize * 1.55,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

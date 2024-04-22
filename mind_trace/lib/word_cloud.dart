@@ -46,8 +46,8 @@ class _WordCloudState extends State<WordCloud> {
         ),
       );
     } else {
-      double maxFontSize = fontSize * 3.45;
-      double minFontSize = fontSize * 1.7;
+      double maxFontSize = fontSize * 2.75;
+      double minFontSize = fontSize * 1.25;
       double fontSizeRange = maxFontSize - minFontSize;
 
       double maxValue = widget.wordList
@@ -63,18 +63,17 @@ class _WordCloudState extends State<WordCloud> {
         child: FittedBox(
           child: Scatter(
             fillGaps: true,
-            delegate: ArchimedeanSpiralScatterDelegate(ratio: 0.9),
+            delegate: ArchimedeanSpiralScatterDelegate(ratio: 1),
             children: widget.wordList.map((word) {
               String wordText = word['word'] as String;
               int valueText = word['value'];
               double wordFontSize;
               if (maxValue == minValue) {
-                wordFontSize = fontSize;
+                wordFontSize = width*0.4;
               } else {
                 wordFontSize = minFontSize +
                     ((word['value'] - minValue) / (maxValue - minValue)) * fontSizeRange;
               }
-
 
               Color textColor = strokeMap[wordText] != null
                   ? colorMap[wordText] ?? colors[colorIndex]
