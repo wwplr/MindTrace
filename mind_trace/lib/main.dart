@@ -11,6 +11,7 @@ final flutterNotification = FlutterNotification();
 final DateTime now = DateTime.now();
 DateTime afternoonScheduledDateTime = DateTime(now.year, now.month, now.day, 13, 00);
 DateTime eveningScheduledDateTime = DateTime(now.year, now.month, now.day, 22, 00);
+DateTime uploadScheduledDateTime = DateTime(now.year, now.month, now.day, 18, 00);
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await flutterNotification.initialiseNotifications();
 
+
+  // Afternoon notification
   if (afternoonScheduledDateTime.isBefore(now)) {
     afternoonScheduledDateTime = afternoonScheduledDateTime.add(Duration(days: 1));
   }
@@ -28,7 +31,7 @@ void main() async {
     scheduledNotificationDateTime: afternoonScheduledDateTime,
   );
 
-  // Evening Notification
+  // Evening notification
   if (eveningScheduledDateTime.isBefore(now)) {
     eveningScheduledDateTime = eveningScheduledDateTime.add(Duration(days: 1));
   }
@@ -37,6 +40,17 @@ void main() async {
     title: 'Mind Trace',
     body: "Are you on TikTok? Don't forget to log your mood.",
     scheduledNotificationDateTime: eveningScheduledDateTime,
+  );
+
+  // File upload notification
+  if (uploadScheduledDateTime.isBefore(now)) {
+    uploadScheduledDateTime = uploadScheduledDateTime.add(Duration(days: 2));
+  }
+  await flutterNotification.scheduleNotification(
+    id: 5,
+    title: 'Mind Trace',
+    body: "Don't forget to upload your TikTok browsing history. Thank you!",
+    scheduledNotificationDateTime: uploadScheduledDateTime,
   );
 
   runApp(
