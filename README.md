@@ -8,3 +8,5 @@ Mind Trace is mood-tracking application to facilitate user self-reflection on th
 
 ## Navigation
 [Click here](mind_trace/lib) to view the source code.
+
+Project by Warintorn Palarit
