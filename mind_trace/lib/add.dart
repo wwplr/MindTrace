@@ -333,7 +333,7 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
           .get();
 
       if (documentSnapshot.exists) {
-        int setIndex = 0;
+        int sessionCount = 0;
         percentIndex = 0;
         String previousMood = 'None';
         String previousTimestamp = 'None';
@@ -392,11 +392,11 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                 currentMoods = [];
               } else {
                 //If 'Finish' is not logged, do it's job
-                newTimestamps[setIndex] = currentTimestamps;
-                newCategories[setIndex] = currentCategories;
-                newMoods[setIndex] = currentMoods;
+                newTimestamps[sessionCount] = currentTimestamps;
+                newCategories[sessionCount] = currentCategories;
+                newMoods[sessionCount] = currentMoods;
                 if (!skipCount) {
-                  setIndex++;
+                  sessionCount++;
                 }
 
                 //Then add 'Finish' to the database to correct the format
@@ -442,11 +442,11 @@ class _AddState extends State<Add> with WidgetsBindingObserver {
                   print("Finish deleted successfully.");
                 });
               } else {
-                newTimestamps[setIndex] = currentTimestamps;
-                newCategories[setIndex] = currentCategories;
-                newMoods[setIndex] = currentMoods;
+                newTimestamps[sessionCount] = currentTimestamps;
+                newCategories[sessionCount] = currentCategories;
+                newMoods[sessionCount] = currentMoods;
                 if (!skipCount) {
-                  setIndex++;
+                  sessionCount++;
                 }
               }
             } else {

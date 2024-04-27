@@ -102,7 +102,7 @@ class _HomeState extends State<Home> {
         List<String> currentDate = [];
         List<String> currentTime = [];
         List<String> currentCategories = [];
-        int setIndex = 0;
+        int sessionCount = 0;
         Map<int, List<int>> newMoods = {};
         Map<int, List<String>> newDates = {};
         Map<int, List<String>> newTimes = {};
@@ -147,11 +147,11 @@ class _HomeState extends State<Home> {
               currentTime = [];
               currentCategories = [];
             } else if (mood == 'Finish') {
-              newMoods[setIndex] = currentMoods;
-              newDates[setIndex] = currentDate;
-              newTimes[setIndex] = currentTime;
-              newCategories[setIndex] = currentCategories;
-              setIndex++;
+              newMoods[sessionCount] = currentMoods;
+              newDates[sessionCount] = currentDate;
+              newTimes[sessionCount] = currentTime;
+              newCategories[sessionCount] = currentCategories;
+              sessionCount++;
             } else {
               currentMoods.add(getMoodValue(mood));
               currentDate.add(date);
