@@ -70,7 +70,7 @@ def process_file():
 def generate_openai_response(hashtags):
     # Set your OpenAI GPT-3 API key
     client = OpenAI(
-        api_key='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'
+        api_key='OpenAI_API_KEY'
     )
     # Your prompt or message to ChatGPT
     user_input = 'Top 5 TikTok categories (excluding "fyp") based on these hashtags in one word separated by a comma, treat synonyms as identical:' + str(hashtags)
