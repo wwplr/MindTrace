@@ -10,7 +10,7 @@ Mind Trace is a mood-tracking application to facilitate user self-reflection on 
 <img alt="final_ui" src="https://github.com/wwplr/MindTrace/assets/98458713/3e7cf4f4-149e-499f-9a6f-9e01d1f3d025" style="display: block; width: 200; height: auto; margin: 0 auto">
 
 ## Navigation
-[Click here](mind_trace/lib) to view the source code.
-[Click here](flask.py) to view the back-end Flask code.
+- [Click here](mind_trace/lib) to view the source code.
+- [Click here](flask.py) to view the back-end Flask code.
 
 Project by Warintorn Palarit
